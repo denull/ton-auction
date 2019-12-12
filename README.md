@@ -33,16 +33,37 @@ This should rebuild files `code-getters.fif` (full version of the contract) and 
 
 This contract allows you to conduct any number of simultaneous auctions. Each auction is defined by the initial price, (optionally) the buyout price, bidding fee, start and end time, and other configuration params. Note that by setting the initial price equal to the buyout price, this can be turned into a simple trading process.
 
-While an auction is active, anyone can place a bid by sending an internal message to this contract. If the attached amount of grams is above the current price, it's accepted, and the previous top bid is cancelled (it's amount, minus the bidding fee, is returned to the bidder).
+While an auction is active, anyone can place a bid by sending an external message to this contract. If the attached amount of grams is above the current price, it's accepted, and the previous top bid is cancelled (it's amount, minus the bidding fee, is returned to the bidder).
 
 Auction ends at the specified end time, or if the current price reaches the buyout price. At that moment a log message is generated (to notify some off-chain script about auction completion).
 
-Special case: blind auctions. In this case every participant submits an internal message with a fixed amount of grams, with the actual bid value encrypted by some random key. For some predefined time after the auction ends, those keys are collected from participants, their bids are decrypted and the winner is determined.
+Special case: blind auctions. In this case every participant submits an external message with a fixed amount of grams, with the actual bid value encrypted by some random key. For some predefined time after the auction ends, those keys are collected from participants, their bids are decrypted and the winner is determined.
 
-## ...
-`./init.fif <workchain-id> <n> [<k> <filename-base>] [-C <code-fif>]`
+Owner of the auction contract can withdraw funds at any time on condition that the remaining balance is at least equal to the sum of all currently active top bids (so they can be always returned).
 
+## Initialising a new contract
+`./init.fif [<filename-base>] [-C <code-fif>]`
+(external)
 
+## Starting a new auction
+`./new-auction.fif`
+(external)
+
+## Placing a bid
+`./place-bid.fif`
+(internal)
+
+## Decrypt a bid
+`./decrypt-bid.fif`
+(external)
+
+## Pinging an auction
+`./ping-auction.fif`
+(external)
+
+## Withdrawing funds from the contract
+`./withdraw.fif`
+(external)
 
 # Get methods
 
@@ -69,7 +90,7 @@ But most importantly, you can run `test-message.fif` with a message file (that y
 
 Fift language is quite flexible, but it can be difficult to read. There's two main reasons for that: stack juggling and no strict conventions for word names. To make the code more readable, some custom conventions were introduced within this repository:
 
-`kebab-case-words()` are helper functions (defined in `common-utils.fif`). Note that the name includes the parentheses at the end. (The only exceptions are `maybe,` and `maybe@+`)
+`kebab-case-words()` are helper functions (defined in `common-utils.fif` and `auction-utils.fif`). Note that the name includes the parentheses at the end. (The only exceptions are `maybe,` and `maybe@+`)
 
 `CamelCaseWords` are constants, defined using a `=:` word.
 

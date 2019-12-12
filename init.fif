@@ -34,6 +34,7 @@ FileBase +".pk" load-generate-keypair
 =: PublicKey
 
 <b
+  0 32 u,
   PublicKey B,
 b> =: ContractData
 ."ContractData: " ContractData <s csr. cr
