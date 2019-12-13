@@ -1,9 +1,9 @@
 #!/usr/bin/env fift -s
 "auction-utils.fif" include
 
-{ ."<workchain-id> [<filename-base>] [-C <code-fif>]" cr
+{ ."<workchain-id> <notification-addr> [<filename-base>] [-C <code-fif>]" cr
   ."Creates a new auction contract, with private key saved to or loaded from <filename-base>.pk" cr
-  ."('new-auction.pk' by default)." cr
+  ."('new-auction.pk' by default). Information about auction results will be sent to <notification-addr>." cr
   ."By default uses the full code of the contract. If you want to use stripped-down version (without get-methods), pass 'auction-code' as last argument."
 } : usage()
 
@@ -13,7 +13,8 @@
   "-C" "--code-file" 1 { +".fif" include =: ContractCode } option-long()
 
   1 { parse-workchain-id =: WorkchainId } nth-argument()
-  2 { =: FileBase } nth-argument()
+  2 { =: NotificationAddr } nth-argument()
+  3 { =: FileBase } nth-argument()
   no-more-arguments() // Prevents adding too much arguments
 } scan-args()
 
@@ -34,8 +35,10 @@ FileBase +".pk" load-generate-keypair
 =: PublicKey
 
 <b
-  0 32 u,
-  PublicKey B,
+  0 32 u, // seqno
+  PublicKey B, // owner pubkey
+  NotificationAddr addr, // notification addr
+  null dict, // active auctions
 b> =: ContractData
 ."ContractData: " ContractData <s csr. cr
 
