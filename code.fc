@@ -17,21 +17,24 @@
   send_raw_message(msg.end_cell(), mode);
 }
 
-(int, int, int) check_blind_bids(auction_type, bids) {
+(int, int, int, int) check_blind_bids(auction_type, bidding_fee, bids, reserved_balance, force_completion) {
   var winner_addr = 0;
   var winner_bid = 0;
+  var winner_received = 0;
   var all_decrypted = true;
   var bidder_addr = -1;
   do {
     (bidder_addr, var bid, var f) = bids.udict_get_next?(256, bidder_addr);
     if (f) {
       var received_amount = bid~load_grams();
+      var bid_signature = bid~load_bits(512);
       ifnot (bid.slice_data_empty?) {
         var actual_amount = bid~load_grams();
         if (actual_amount > winner_bid) {
           ;; TODO: handle case when there's two equal top bids (the first one wins?)
           winner_addr = bidder_addr;
           winner_bid = actual_amount;
+          winner_received = received_amount;
         }
       } else {
         all_decrypted = false;
@@ -39,39 +42,70 @@
     }
   } until (~ f);
 
-  ifnot (winner_bid == 0) {
-    bidder_addr = -1;
-    var second_bid = 0;
-    do {
-      (bidder_addr, var bid, var f) = bids.udict_get_next?(256, bidder_addr);
-      if (f) {
-        var received_amount = bid~load_grams();
-        ifnot (bidder_addr == winner_addr) {
-          send_raw_message(begin_cell()
-            .store_uint(0x18, 6)
-            .store_slice(bidder_addr)
-            .store_grams(received_amount - bidding_fee)
-            .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-            .store_uint(0, 32) ;; Simple money transfer
-          .end_cell(), 0);
+  if ((winner_bid == 0) | (!force_completion & !all_decrypted)) {
+    return (winner_addr, winner_bid, all_decrypted, reserved_balance)
+  }
 
-          ifnot (bid.slice_data_empty?) {
-            var actual_amount = bid~load_grams();
-            if (actual_amount > second_bid && actual_amount < winner_bid) {
-              second_bid = actual_amount;
-            }
+  bidder_addr = -1;
+  var second_bid = 0;
+  do {
+    (bidder_addr, var bid, var f) = bids.udict_get_next?(256, bidder_addr);
+    if (f) {
+      var received_amount = bid~load_grams();
+      ifnot (bidder_addr == winner_addr) {
+        reserved_balance = reserved_balance - (received_amount - bidding_fee);
+
+        send_raw_message(begin_cell()
+          .store_uint(0x18, 6)
+          .store_slice(bidder_addr)
+          .store_grams(received_amount - bidding_fee)
+          .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+          .store_uint(0, 32) ;; Simple money transfer
+        .end_cell(), 0);
+
+        var bid_signature = bid~load_bits(512);
+        ifnot (bid.slice_data_empty?) {
+          var actual_amount = bid~load_grams();
+          if (actual_amount > second_bid && actual_amount < winner_bid) {
+            second_bid = actual_amount;
           }
         }
       }
-    } until (~ f);
-
-    if (auction_type == 65) {
-      ;; Vickrey auction: winner pays second price instead of his own
-      winner_bid = second_bid;
     }
+  } until (~ f);
+
+  if (auction_type == 65) {
+    ;; Vickrey auction: winner pays second price instead of his own
+    winner_bid = second_bid;
   }
 
-  return (winner_addr, winner_bid, all_decrypted)
+  if (winner_received > winner_bid) {
+    reserved_balance = reserved_balance - (winner_received - bidding_fee);
+
+    send_raw_message(begin_cell()
+      .store_uint(0x18, 6)
+      .store_slice(winner_addr)
+      .store_grams(winner_received - winner_bid)
+      .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+      .store_uint(0, 32) ;; Simple money transfer
+    .end_cell(), 0);
+  }
+
+  return (winner_addr, winner_bid, all_decrypted, reserved_balance)
+}
+
+() send_auction_notification(int notification_addr, int auction_id, int winner_addr, int winner_bid, cell auction) impure {
+  send_raw_message(begin_cell()
+    .store_uint(0xc4ff, 17)       ;; 0 11000100 0xff 
+    .store_uint(notification_addr, 256)
+    .store_grams(1 << 30)
+    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+    .store_uint(0x27fca6b9, 32)   ;; Notification query
+    .store_uint(auction_id, 64)
+    .store_uint(winner_addr, 256) ;; Bidder addr (can be 0 if there was no bids!)
+    .store_grams(winner_bid)      ;; Winning bid amount
+    .store_ref(auction)           ;; Detailed info about auction (before this bid)
+  .end_cell(), 1);
 }
 
 () recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
@@ -185,10 +219,12 @@
 
         reserved_balance = reserved_balance + (msg_value - bidding_fee)
 
+        var bid_signature = cs~load_bits(512);
+
         ;; Store encrypted bid for later
         bids~udict_set_builder(256, src_addr, begin_cell()
           .store_grams(msg_value)
-          .store_ref(cs~load_ref()));
+          .store_bits(bid_signature));
 
         auctions~udict_set_builder(32, auction_id, begin_cell()
           .store_uint(auction_type, 8)
@@ -266,23 +302,12 @@
 
       var fixed_amount = auction~load_grams();
       var bids = auction~load_dict();
-      (winner_addr, winner_bid, all_decrypted) = check_blind_bids(auction_type, bids);
+      (winner_addr, winner_bid, var all_decrypted, reserved_balance) = check_blind_bids(auction_type, bidding_fee, bids, reserved_balance, true);
     }
 
     ;; Remove auction from state, send notification
     auctions~udict_delete_get?(32, auction_id);
-
-    send_raw_message(begin_cell()
-      .store_uint(0xc4ff, 17)       ;; 0 11000100 0xff 
-      .store_uint(notification_addr, 256)
-      .store_grams(1 << 30)
-      .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-      .store_uint(0x27fca6b9, 32)   ;; Notification query
-      .store_uint(auction_id, 64)
-      .store_uint(winner_addr, 256) ;; Bidder addr (can be 0 if there was no bids!)
-      .store_grams(winner_bid)      ;; Winning bid amount
-      .store_ref(auction)           ;; Detailed info about auction (before this bid)
-    .end_cell(), 1);
+    send_auction_notification(notification_addr, auction_id, winner_addr, winner_bid, auction);
 
     set_data(
       begin_cell()
@@ -315,16 +340,67 @@
   throw_unless(33, msg_seqno == stored_seqno);
 
   var owner_pubkey = ds~load_uint(256);
-  throw_unless(34, check_signature(slice_hash(in_msg), signature, owner_pubkey));
-
-  accept_message();
-
   var notification_addr = ds~load_uint(256);
+  var reserved_balance = ds~load_grams();
   var auctions = ds~load_dict();
+
+  if (op == 102) {
+    ;; Decrypt an encrypted bid (in a blind auction)
+    var current_pubkey = cs~load_uint(256);
+    throw_unless(34, check_signature(slice_hash(in_msg), signature, current_pubkey));
+    var auction_id = cs~load_uint(32);
+    var (auction, auction_found) = auctions.udict_get?(32, auction_id);
+    throw_unless(35, auction_found);
+
+    var auction_type = auction~load_uint(8);
+    throw_unless(36, auction_type >= 64); ;; decrypt needed only for blind auctions
+
+    var start_time = auction~load_uint(32);
+    var end_time = auction~load_uint(32);
+    throw_unless(37, end_time > now()); ;; => auction is not yet finished
+    var bidding_fee = auction~load_grams();
+    var buyout_price = auction~load_grams();
+    var decrypt_time = auction~load_uint(32);
+    throw_unless(38, decrypt_time < now()); ;; => auction's decryption stage is already finished
+    var fixed_amount = auction~load_grams();
+    var bids = auction~load_dict();
+
+    var current_addr = cs~load_uint(256);
+    var (bid, bid_found) = bid.udict_get?(256, current_addr);
+    throw_unless(39, bid_found);
+
+    var received_amount = bid~load_grams();
+    var bid_signature = bid~load_bits(512);
+
+    var subcell = cs~load_ref();
+    throw_unless(40, check_signature(slice_hash(subcell), bid_signature, current_pubkey));
+    throw_unless(41, subcell~load_uint(32) == auction_id);
+    throw_unless(42, subcell~load_uint(256) == current_addr);
+
+    accept_message();
+
+    var actual_amount = subcell~load_grams();
+    if (actual_amount >= initial_price && actual_amount <= received_amount) {
+      bids~udict_set_builder(256, current_addr, begin_cell()
+        .store_grams(received_amount)
+        .store_bits(bid_signature)
+        .store_grams(actual_amount));
+    }
+
+    var (winner_addr, winner_bid, all_decrypted, reserved_balance) = check_blind_bids(auction_type, bidding_fee, bids, reserved_balance, false);
+
+    if (all_decrypted) {
+      ;; Remove auction from state, send notification
+      auctions~udict_delete_get?(32, auction_id);
+      send_auction_notification(notification_addr, auction_id, winner_addr, winner_bid, auction);
+    }
+  } else {
+    throw_unless(36, check_signature(slice_hash(in_msg), signature, owner_pubkey));
+    accept_message();
+  }
 
   if (op == 1) {
     var transfer_balance = 0;
-    var reserved_balance = ds~load_grams();
 
     ;; Withdraw money (just like from a regular wallet)
     cs~touch();
@@ -349,9 +425,6 @@
 
   } elseif (op == 3) {
     ;; Cancel an auction
-
-  } elseif (op == 102) {
-    ;; Decrypt an encrypted bid (in a blind auction)
 
   }
 
