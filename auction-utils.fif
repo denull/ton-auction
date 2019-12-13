@@ -1,1 +1,20 @@
 "common-utils.fif" include
+
+{
+  <b
+    rot 32 u, // seqno, initially 0
+    swap 32 i,    // valid_until
+    0 32 u,      // action, 0 = none (init)
+  b>
+} : empty-message()
+
+// sign-message()
+// (message_body private_key -- slice)
+//
+// Attaches signature to a slice representing message body.
+{
+  over hashu swap ed25519_sign_uint
+  <b 
+    swap B, swap <s s,
+  b>
+} : sign-message()

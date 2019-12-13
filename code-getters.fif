@@ -1,0 +1,59 @@
+// automatically generated from `../src/crypto/smartcont/stdlib.fc` `code.fc` `getters.fc` 
+PROGRAM{
+  DECLPROC recv_internal
+  DECLPROC recv_external
+  85143 DECLMETHOD seqno
+  recv_internal PROC:<{
+    DROP
+  }>
+  recv_external PROC:<{
+    9 PUSHPOW2
+    LDSLICEX
+    DUP
+    32 LDU
+    32 LDU
+    32 LDU
+    DROP
+    NOW
+    s1 s2 XCHG
+    LESS
+    35 THROWIF
+    c4 PUSH
+    CTOS
+    32 LDU
+    s3 s1 XCPU
+    EQUAL
+    33 THROWIFNOT
+    s0 s2 XCHG
+    256 LDU
+    s0 s4 XCHG
+    HASHSU
+    s0 s5 s5 XC2PU
+    CHKSIGNU
+    34 THROWIFNOT
+    ACCEPT
+    s0 s2 XCHG
+    256 LDU
+    LDDICT
+    DROP
+    s0 s3 XCHG
+    1 EQINT
+    DROP
+    SWAP
+    INC
+    NEWC
+    32 STU
+    s1 s3 XCHG
+    256 STU
+    s1 s2 XCHG
+    256 STU
+    STDICT
+    ENDC
+    c4 POP
+  }>
+  seqno PROC:<{
+    c4 PUSH
+    CTOS
+    32 PLDU
+  }>
+}END>c
