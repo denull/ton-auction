@@ -1,13 +1,193 @@
-;; Multi-signature wallet smart contract
 
-() recv_internal(slice in_msg) impure {
-  
+() send_message_back(addr, ans_tag, query_id, body, extra, grams, mode) impure {
+  ;; int_msg_info$0 ihr_disabled:Bool bounce:Bool bounced:Bool src:MsgAddress -> 011000
+  var msg = begin_cell()
+    .store_uint(0x18, 6)
+    .store_slice(addr)
+    .store_grams(grams)
+    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+    .store_uint(ans_tag, 32)
+    .store_uint(query_id, 64);
+  if (body >= 0) {
+    msg~store_uint(body, 32);
+  }
+  if (extra >= 0) {
+    msg~store_uint(extra, 32);
+  }
+  send_raw_message(msg.end_cell(), mode);
+}
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+  var cs = in_msg;
+  var flags = cs~load_uint(4);  ;; int_msg_info$0 ihr_disabled:Bool bounce:Bool bounced:Bool
+  if (flags & 1) { ;; ignore bounced
+    return ();
+  }
+  var src_addr = cs~load_msg_addr();
+  if (in_msg.slice_empty?()) {
+    return
+  }
+  var op = cs~load_uint(32);
+  if (op == 0) {
+    return
+  }
+  int query_id = cs~load_uint(64);
+  if (op == 100) {
+    ;; Place a bid
+    var ds = get_data().begin_parse();
+    var stored_seqno = ds~load_uint(32);
+    var notification_addr = ds~load_uint(256);
+    var auctions = ds~load_dict();
+
+    var auction_id = cs~load_uint(32);
+    var (auction, auction_found) = auctions.udict_get?(32, auction_id);
+    ifnot (auction_found) {
+      return send_message_back(src_addr, 0xfffffffe, query_id, op, 1, 0, 64);
+    }
+
+    var auction_type = auction~load_uint(8);
+    var start_time = auction~load_uint(32);
+    ifnot (start_time < now()) { ;; => auction is not yet started
+      return send_message_back(src_addr, 0xfffffffe, query_id, op, 2, 0, 64);
+    }
+
+    var end_time = auction~load_uint(32);
+    ifnot (end_time > now()) { ;; => auction is already finished
+      return send_message_back(src_addr, 0xfffffffe, query_id, op, 3, 0, 64);
+    }
+
+    var bidding_fee = auction~load_grams();
+    ifnot (msg_value >= bidding_fee) { ;; => attached value is not enough even for a fee
+      return send_message_back(src_addr, 0xfffffffe, query_id, op, 4, 0, 64);
+    }
+
+    var buyout_price = auction~load_grams();
+    
+    var is_won = false;
+    if (auction_type < 64) {
+      ;; English auction
+
+      if ((buyout_price > 0) & (msg_value >= buyout_price)) {
+        ;; Enough money to instantly complete this auction
+        is_won = true;
+      }
+
+      var initial_price = auction~load_grams();
+      ifnot (msg_value >= initial_price) { ;; => attached value is not enough even for initial price
+        return send_message_back(src_addr, 0xfffffffe, query_id, op, 5, 0, 64);
+      }
+
+      var minimum_step = auction~load_grams();
+      var current_price = auction~load_grams();
+      ifnot (current_price == 0) {
+        ifnot (msg_value >= current_price + minimum_step) { ;; => attached value is not enough to outbid current top bidder
+          return send_message_back(src_addr, 0xfffffffe, query_id, op, 6, 0, 64);
+        }
+
+        reserved_balance = reserved_balance - (current_price - bidding_fee);
+
+        ;; Replace current bidder, return him his bid
+        var current_addr = auction~load_uint(256);
+        send_raw_message(begin_cell()
+          .store_uint(0x18, 6)
+          .store_slice(current_addr)
+          .store_grams(current_price - bidding_fee)
+          .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+          .store_uint(0, 32) ;; Simple money transfer
+        .end_cell(), 0);
+      }
+
+      if (!is_won) {
+        reserved_balance = reserved_balance + (msg_value - bidding_fee);
+
+        auctions~udict_set_builder(32, auction_id, begin_cell()
+          .store_uint(auction_type, 8)
+          .store_uint(start_time, 32)
+          .store_uint(end_time, 32)
+          .store_grams(bidding_fee)
+          .store_grams(buyout_price)
+          .store_grams(initial_price)
+          .store_grams(msg_value)
+          .store_uint(src_addr, 256));
+      }
+    } else {
+      ;; Blind auction
+      var fixed_amount = auction~load_grams();
+      ifnot (msg_value >= fixed_amount) { ;; => all bids should be equal to the fixed price (the remainders will be returned later)
+        return send_message_back(src_addr, 0xfffffffe, query_id, op, 7, 0, 64);
+      }
+      if ((buyout_price > fixed_amount) && (msg_value >= buyout_price)) {
+        is_won = true;
+      } else {
+        var bids = auction~load_dict();
+        ;; Add to bidders
+        var (bid, bid_found) = bids.udict_get?(256, src_addr);
+        if (bid_found) { ;; => already participated in this auction (not allowed in blind auctions)
+          return send_message_back(src_addr, 0xfffffffe, query_id, op, 8, 0, 64);
+        }
+
+        reserved_balance = reserved_balance + (msg_value - bidding_fee)
+
+        ;; Store encrypted bid for later
+        bids~udict_set_builder(256, src_addr, begin_cell()
+          .store_grams(msg_value)
+          .store_ref(cs~load_ref()));
+
+        auctions~udict_set_builder(32, auction_id, begin_cell()
+          .store_uint(auction_type, 8)
+          .store_uint(start_time, 32)
+          .store_uint(end_time, 32)
+          .store_grams(bidding_fee)
+          .store_grams(buyout_price)
+          .store_grams(fixed_amount)
+          .store_dict(bids));
+      }
+    }
+
+    if (is_won) {
+      ;; Remove auction from state, send notification
+      auctions~udict_delete_get?(32, auction_id);
+
+      send_raw_message(begin_cell()
+        .store_uint(0xc4ff, 17)     ;; 0 11000100 0xff 
+        .store_uint(notification_addr, 256)
+        .store_grams(1 << 30)
+        .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+        .store_uint(0x27fca6b9, 32) ;; Notification query
+        .store_uint(auction_id, 64)
+        .store_uint(src_addr, 256)  ;; Bidder addr
+        .store_grams(msg_value)     ;; Winning bid amount
+        .store_ref(auction)         ;; Detailed info about auction (before this bid)
+      .end_cell(), 1);
+    }
+
+    set_data(
+      begin_cell()
+        .store_uint(stored_seqno, 32)
+        .store_uint(owner_pubkey, 256)
+        .store_uint(notification_addr, 256)
+        .store_grams(reserved_balance)
+        .store_dict(auctions)
+      .end_cell()
+    );
+    return
+  } elseif (op == 101) {
+    ;; Ping an auction (trigger winner selection if now() >= end_time)
+    
+    ;; Return unused money
+    return send_message_back(src_addr, 0, query_id, op, 0, 0, 64);
+  }
+
+  ifnot (op & (1 << 31)) {
+    ;; unknown query, return error
+    return send_message_back(src_addr, 0xffffffff, query_id, op, 0, 0, 64);
+  }
 }
 
 () recv_external(slice in_msg) impure {
   var signature = in_msg~load_bits(512);
   var cs = in_msg;
-  var (msg_seqno, valid_until, action) = (cs~load_uint(32), cs~load_uint(32), cs~load_uint(32));
+  var (msg_seqno, valid_until, op) = (cs~load_uint(32), cs~load_uint(32), cs~load_uint(32));
   throw_if(35, valid_until < now());
 
   var ds = get_data().begin_parse();
@@ -22,7 +202,36 @@
   var notification_addr = ds~load_uint(256);
   var auctions = ds~load_dict();
 
-  if (action == 1) {
+  if (op == 1) {
+    var transfer_balance = 0;
+    var reserved_balance = ds~load_grams();
+
+    ;; Withdraw money (just like from a regular wallet)
+    cs~touch();
+    while (!cs.slice_empty?()) {
+      var addr = cs~load_uint(256);
+      var amount = cs~load_grams();
+
+      transfer_balance += amount;
+      var remaining_balance = get_balance() - transfer_balance;
+      throw_unless(44, reserved_balance >= remaining_balance);
+
+      send_raw_message(begin_cell()
+        .store_uint(0x18, 6)
+        .store_slice(addr)
+        .store_grams(amount)
+        .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+        .store_uint(0, 32) ;; Simple money transfer
+      .end_cell(), 0);
+    }
+  } elseif (op == 2) {
+    ;; Create new auction
+
+  } elseif (op == 3) {
+    ;; Cancel an auction
+
+  } elseif (op == 102) {
+    ;; Decrypt an encrypted bid (in a blind auction)
 
   }
 
@@ -31,6 +240,7 @@
       .store_uint(stored_seqno + 1, 32)
       .store_uint(owner_pubkey, 256)
       .store_uint(notification_addr, 256)
+      .store_grams(reserved_balance)
       .store_dict(auctions)
     .end_cell()
   );
