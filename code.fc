@@ -17,6 +17,63 @@
   send_raw_message(msg.end_cell(), mode);
 }
 
+(int, int, int) check_blind_bids(auction_type, bids) {
+  var winner_addr = 0;
+  var winner_bid = 0;
+  var all_decrypted = true;
+  var bidder_addr = -1;
+  do {
+    (bidder_addr, var bid, var f) = bids.udict_get_next?(256, bidder_addr);
+    if (f) {
+      var received_amount = bid~load_grams();
+      ifnot (bid.slice_data_empty?) {
+        var actual_amount = bid~load_grams();
+        if (actual_amount > winner_bid) {
+          ;; TODO: handle case when there's two equal top bids (the first one wins?)
+          winner_addr = bidder_addr;
+          winner_bid = actual_amount;
+        }
+      } else {
+        all_decrypted = false;
+      }
+    }
+  } until (~ f);
+
+  ifnot (winner_bid == 0) {
+    bidder_addr = -1;
+    var second_bid = 0;
+    do {
+      (bidder_addr, var bid, var f) = bids.udict_get_next?(256, bidder_addr);
+      if (f) {
+        var received_amount = bid~load_grams();
+        ifnot (bidder_addr == winner_addr) {
+          send_raw_message(begin_cell()
+            .store_uint(0x18, 6)
+            .store_slice(bidder_addr)
+            .store_grams(received_amount - bidding_fee)
+            .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+            .store_uint(0, 32) ;; Simple money transfer
+          .end_cell(), 0);
+
+          ifnot (bid.slice_data_empty?) {
+            var actual_amount = bid~load_grams();
+            if (actual_amount > second_bid && actual_amount < winner_bid) {
+              second_bid = actual_amount;
+            }
+          }
+        }
+      }
+    } until (~ f);
+
+    if (auction_type == 65) {
+      ;; Vickrey auction: winner pays second price instead of his own
+      winner_bid = second_bid;
+    }
+  }
+
+  return (winner_addr, winner_bid, all_decrypted)
+}
+
 () recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
   var cs = in_msg;
   var flags = cs~load_uint(4);  ;; int_msg_info$0 ihr_disabled:Bool bounce:Bool bounced:Bool
@@ -31,14 +88,13 @@
   if (op == 0) {
     return
   }
+  var ds = get_data().begin_parse();
+  var stored_seqno = ds~load_uint(32);
+  var notification_addr = ds~load_uint(256);
+  var auctions = ds~load_dict();
   int query_id = cs~load_uint(64);
   if (op == 100) {
     ;; Place a bid
-    var ds = get_data().begin_parse();
-    var stored_seqno = ds~load_uint(32);
-    var notification_addr = ds~load_uint(256);
-    var auctions = ds~load_dict();
-
     var auction_id = cs~load_uint(32);
     var (auction, auction_found) = auctions.udict_get?(32, auction_id);
     ifnot (auction_found) {
@@ -112,6 +168,7 @@
       }
     } else {
       ;; Blind auction
+      var decrypt_time = auction~load_uint(32);
       var fixed_amount = auction~load_grams();
       ifnot (msg_value >= fixed_amount) { ;; => all bids should be equal to the fixed price (the remainders will be returned later)
         return send_message_back(src_addr, 0xfffffffe, query_id, op, 7, 0, 64);
@@ -139,6 +196,7 @@
           .store_uint(end_time, 32)
           .store_grams(bidding_fee)
           .store_grams(buyout_price)
+          .store_uint(decrypt_time, 32)
           .store_grams(fixed_amount)
           .store_dict(bids));
       }
@@ -172,7 +230,69 @@
     );
     return
   } elseif (op == 101) {
-    ;; Ping an auction (trigger winner selection if now() >= end_time)
+    ;; Ping an auction (trigger winner selection if now() >= end_time or, for blind auctions, now() >= decrypt_time)
+    var auction_id = cs~load_uint(32);
+    var (auction, auction_found) = auctions.udict_get?(32, auction_id);
+    ifnot (auction_found) {
+      return send_message_back(src_addr, 0xfffffffe, query_id, op, 1, 0, 64);
+    }
+
+    var auction_type = auction~load_uint(8);
+    var start_time = auction~load_uint(32);
+    var end_time = auction~load_uint(32);
+    if (end_time > now()) { ;; => auction is not yet finished
+      return send_message_back(src_addr, 0xfffffffe, query_id, op, 3, 0, 64);
+    }
+
+    var bidding_fee = auction~load_grams();
+    var buyout_price = auction~load_grams();
+    var winner_addr = 0;
+    var winner_bid = 0;
+    if (auction_type < 64) {
+      ;; English auction
+      var initial_price = auction~load_grams();
+      var minimum_step = auction~load_grams();
+      winner_bid = auction~load_grams();
+      ifnot (winner_bid == 0) {
+        winner_addr = auction~load_uint(256);
+        reserved_balance = reserved_balance - (current_price - bidding_fee);
+      }
+    } else {
+      ;; Blind auction
+      var decrypt_time = auction~load_uint(32);
+      if (decrypt_time > now()) { ;; => auction's decryption stage is not yet finished
+        return send_message_back(src_addr, 0xfffffffe, query_id, op, 3, 0, 64);
+      }
+
+      var fixed_amount = auction~load_grams();
+      var bids = auction~load_dict();
+      (winner_addr, winner_bid, all_decrypted) = check_blind_bids(auction_type, bids);
+    }
+
+    ;; Remove auction from state, send notification
+    auctions~udict_delete_get?(32, auction_id);
+
+    send_raw_message(begin_cell()
+      .store_uint(0xc4ff, 17)       ;; 0 11000100 0xff 
+      .store_uint(notification_addr, 256)
+      .store_grams(1 << 30)
+      .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+      .store_uint(0x27fca6b9, 32)   ;; Notification query
+      .store_uint(auction_id, 64)
+      .store_uint(winner_addr, 256) ;; Bidder addr (can be 0 if there was no bids!)
+      .store_grams(winner_bid)      ;; Winning bid amount
+      .store_ref(auction)           ;; Detailed info about auction (before this bid)
+    .end_cell(), 1);
+
+    set_data(
+      begin_cell()
+        .store_uint(stored_seqno, 32)
+        .store_uint(owner_pubkey, 256)
+        .store_uint(notification_addr, 256)
+        .store_grams(reserved_balance)
+        .store_dict(auctions)
+      .end_cell()
+    );
     
     ;; Return unused money
     return send_message_back(src_addr, 0, query_id, op, 0, 0, 64);
