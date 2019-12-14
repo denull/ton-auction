@@ -52,13 +52,13 @@ PROGRAM{
     6 -ROLL
   }>
   pack_state PROCREF:<{
-    s0 s4 XCHG
-    INC
     NEWC
+    s1 s5 XCHG
     32 STU
     s1 s3 XCHG
     256 STU
-    256 STU
+    SWAP
+    STSLICER
     SWAP
     STGRAMS
     STDICT
@@ -69,7 +69,8 @@ PROGRAM{
     CTOS
     32 LDU
     256 LDU
-    256 LDU
+    264 PUSHINT
+    LDSLICEX
     LDGRAMS
     LDDICT
     ENDS
@@ -257,8 +258,8 @@ PROGRAM{
     50431 PUSHINT
     NEWC
     17 STU
-    s1 s7 XCHG
-    256 STU
+    s0 s7 XCHG2
+    STSLICER
     30 PUSHPOW2
     STGRAMS
     s1 s6 XCHG
