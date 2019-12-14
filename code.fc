@@ -35,6 +35,13 @@ _ pack_state(int seqno, int owner_pubkey, int notification_addr, int reserved_ba
   .end_cell();
 }
 
+(int, int, int, int, cell) unpack_state() {
+  var cs = get_data().begin_parse();
+  var res = (cs~load_uint(32), cs~load_uint(256), cs~load_uint(256), cs~load_grams(), cs~load_dict());
+  cs.end_parse();
+  return res;
+}
+
 (int, int, int, int) check_blind_bids(auction_type, bidding_fee, bids, reserved_balance, force_completion) {
   var winner_addr = 0;
   var winner_bid = 0;
@@ -141,14 +148,7 @@ _ pack_state(int seqno, int owner_pubkey, int notification_addr, int reserved_ba
   if (op == 0) {
     return ();
   }
-  var ds = get_data().begin_parse();
-
-  var owner_pubkey = ds~load_uint(256);
-  var stored_seqno = ds~load_uint(32);
-  var notification_addr = ds~load_uint(256);
-  var reserved_balance = ds~load_grams();
-  var auctions = ds~load_dict();
-
+  var (stored_seqno, owner_pubkey, notification_addr, reserved_balance, auctions) = unpack_state();
   int query_id = cs~load_uint(64);
   if (op == 100) {
     ;; Place a bid
@@ -327,15 +327,9 @@ _ pack_state(int seqno, int owner_pubkey, int notification_addr, int reserved_ba
   var (msg_seqno, valid_until, op) = (cs~load_uint(32), cs~load_uint(32), cs~load_uint(32));
   throw_if(35, valid_until < now());
 
-  var ds = get_data().begin_parse();
-  var stored_seqno = ds~load_uint(32);
+  var (stored_seqno, owner_pubkey, notification_addr, reserved_balance, auctions) = unpack_state();
   throw_unless(33, msg_seqno == stored_seqno);
   stored_seqno = stored_seqno + 1;
-
-  var owner_pubkey = ds~load_uint(256);
-  var notification_addr = ds~load_uint(256);
-  var reserved_balance = ds~load_grams();
-  var auctions = ds~load_dict();
 
   if (op == 102) {
     ;; Decrypt an encrypted bid (in a blind auction)

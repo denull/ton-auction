@@ -3,6 +3,7 @@ PROGRAM{
   DECLPROC send_message_back
   DECLPROC ~load_common_auction_fields
   DECLPROC pack_state
+  DECLPROC unpack_state
   DECLPROC check_blind_bids
   DECLPROC send_auction_notification
   DECLPROC recv_internal
@@ -62,6 +63,16 @@ PROGRAM{
     STGRAMS
     STDICT
     ENDC
+  }>
+  unpack_state PROC:<{
+    c4 PUSH
+    CTOS
+    32 LDU
+    256 LDU
+    256 LDU
+    LDGRAMS
+    LDDICT
+    ENDS
   }>
   check_blind_bids PROC:<{
     0 PUSHINT
@@ -289,14 +300,7 @@ PROGRAM{
     IFJMP:<{
       4 BLKDROP
     }>
-    c4 PUSH
-    CTOS
-    256 LDU
-    32 LDU
-    256 LDU
-    LDGRAMS
-    LDDICT
-    DROP
+    unpack_state CALLDICT
     s0 s5 XCHG
     64 LDU
     s7 PUSH
@@ -524,7 +528,8 @@ PROGRAM{
           s2 s3 XCHG
           3 BLKDROP
         }>
-        s4 s4 s0 XCHG3
+        s3 s4 XCHG
+        s3 s3 s0 XCHG3
         pack_state INLINECALLDICT
         c4 POP
       }>
@@ -661,8 +666,7 @@ PROGRAM{
         s0 s3 XCHG
         3 BLKDROP
       }>
-      s3 s4 XCHG
-      s3 s3 s0 XCHG3
+      s4 s4 s0 XCHG3
       pack_state INLINECALLDICT
       c4 POP
     }>
@@ -773,7 +777,8 @@ PROGRAM{
       DICTUDELGET
       NULLSWAPIFNOT
       2DROP
-      s1 s4 s0 XCHG3
+      s3 s4 XCHG
+      s1 s3 s0 XCHG3
       pack_state INLINECALLDICT
       c4 POP
       0 PUSHINT
@@ -813,19 +818,12 @@ PROGRAM{
     s1 s3 XCHG
     LESS
     35 THROWIF
-    c4 PUSH
-    CTOS
-    32 LDU
-    s4 s1 XCPU
+    unpack_state CALLDICT
+    s7 s4 XCPU
     EQUAL
     33 THROWIFNOT
-    INC
     s0 s3 XCHG
-    256 LDU
-    256 LDU
-    LDGRAMS
-    LDDICT
-    DROP
+    INC
     s4 PUSH
     102 EQINT
     IF:<{
@@ -839,7 +837,7 @@ PROGRAM{
       34 THROWIFNOT
       s0 s5 XCHG
       32 LDU
-      s1 s3 PUSH2
+      s1 s5 PUSH2
       32 PUSHINT
       DICTUGET
       NULLSWAPIFNOT
@@ -893,8 +891,8 @@ PROGRAM{
       s1 s3 XCPU
       EQUAL
       42 THROWIFNOT
-      s11 s8 s12 PUSH3
-      s13 s12 PUSH2
+      s9 s12 s10 PUSH3
+      s11 s14 PUSH2
       pack_state INLINECALLDICT
       c4 POP
       COMMIT
@@ -923,35 +921,37 @@ PROGRAM{
         4 BLKDROP
       }>
       s2 s8 XCHG
-      s5 PUSH
+      s3 PUSH
       FALSE
       check_blind_bids CALLDICT
       DROP
       IF:<{
-        s7 s3 PUSH2
+        s7 s5 PUSH2
         32 PUSHINT
         DICTUGETOPTREF
-        s7 PUSH
+        s5 PUSH
         s3 s9 XCPU
         s1 s3 s3 XCHG3
         send_auction_notification CALLDICT
-        s5 s5 XCHG2
+        s5 s3 XCHG2
         32 PUSHINT
         DICTUDELGET
         NULLSWAPIFNOT
         2DROP
       }>ELSE<{
-        s2 s7 XCHG
+        s3 s7 XCHG
+        s2 s5 XCHG
+        s2 s3 XCHG
         3 BLKDROP
       }>
     }>ELSE<{
       s0 s7 XCHG
       HASHSU
-      s0 s8 s3 XC2PU
+      s0 s8 s2 XC2PU
       CHKSIGNU
       43 THROWIFNOT
-      s4 s1 s0 PUSH3
-      s9 s8 PUSH2
+      s5 s0 s6 PUSH3
+      s4 s7 PUSH2
       pack_state INLINECALLDICT
       c4 POP
       COMMIT
@@ -976,7 +976,7 @@ PROGRAM{
           ADD
           s6 s0 PUSH2
           SUB
-          s10 s(-1) PUXC
+          s5 s(-1) PUXC
           GEQ
           44 THROWIFNOT
           0 PUSHINT
@@ -1007,13 +1007,13 @@ PROGRAM{
           32 LDU
           LDREF
           DROP
-          s1 s5 PUSH2
+          s1 s4 PUSH2
           32 PUSHINT
           DICTUGET
           NULLSWAPIFNOT
           NIP
           45 THROWIF
-          s0 s1 s5 XCHG3
+          s0 s1 s4 XCHG3
           32 PUSHINT
           DICTUSETREF
         }>ELSE<{
@@ -1023,7 +1023,7 @@ PROGRAM{
             s0 s2 XCHG
             32 LDU
             DROP
-            s0 s4 PUSH2
+            s0 s3 PUSH2
             32 PUSHINT
             DICTUGET
             NULLSWAPIFNOT
@@ -1045,22 +1045,22 @@ PROGRAM{
                 DROP
                 s1 s2 PUSH2
                 SUB
-                s1 s9 XCHG
+                s1 s6 XCHG
                 SUB
                 0 PUSHINT
                 DUP
                 24 PUSHINT
                 NEWC
                 6 STU
-                s1 s11 XCHG
+                s1 s8 XCHG
                 256 STU
                 s3 s4 XCHG2
                 SUB
                 s1 s3 XCHG
                 STGRAMS
-                s1 s8 XCHG
+                s1 s5 XCHG
                 107 STU
-                s1 s7 XCHG
+                s1 s4 XCHG
                 32 STU
                 ENDC
                 0 PUSHINT
@@ -1086,7 +1086,7 @@ PROGRAM{
                   DROP
                   s0 s4 PUSH2
                   SUB
-                  s1 s11 XCHG
+                  s1 s8 XCHG
                   SUB
                   0 PUSHINT
                   DUP
@@ -1095,13 +1095,13 @@ PROGRAM{
                   6 STU
                   s4 s(-1) PUXC
                   256 STU
-                  s13 s7 XCPU
+                  s10 s7 XCPU
                   SUB
-                  s1 s13 XCHG
+                  s1 s10 XCHG
                   STGRAMS
-                  s1 s12 XCHG
+                  s1 s9 XCHG
                   107 STU
-                  s1 s11 XCHG
+                  s1 s8 XCHG
                   32 STU
                   ENDC
                   0 PUSHINT
@@ -1114,22 +1114,22 @@ PROGRAM{
               }>
               3 BLKDROP
             }>
-            s0 s4 XCHG2
+            s0 s3 XCHG2
             32 PUSHINT
             DICTUDELGET
             NULLSWAPIFNOT
             2DROP
           }>ELSE<{
-            s4 s2 XCHG2
+            2SWAP
             DROP
           }>
         }>
-        s0 s3 XCHG
+        s0 s2 XCHG
       }>
-      s4 s3 XCHG2
+      s3 s4 XCHG
+      s1 s3 s3 XCHG3
     }>
-    s2 s4 XCHG
-    s2 s3 XCHG
+    s1 s2 XCHG
     pack_state INLINECALLDICT
     c4 POP
   }>
