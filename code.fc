@@ -390,7 +390,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
       ;; Withdraw money (just like from a regular wallet)
       cs~touch();
       while (~ cs.slice_empty?()) {
-        var addr = cs~load_uint(256);
+        var addr = cs~load_bits(256 + 8);
         var amount = cs~load_grams();
 
         transfer_balance += amount;
@@ -398,7 +398,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
 
         send_raw_message(begin_cell()
           .store_uint(0x18, 6)
-          .store_uint(addr, 256)
+          .store_slice(addr)
           .store_grams(amount)
           .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
           .store_uint(0, 32) ;; Simple money transfer

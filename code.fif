@@ -971,7 +971,8 @@ PROGRAM{
           SEMPTY
           NOT
         }>DO<{
-          256 LDU
+          264 PUSHINT
+          LDSLICEX
           LDGRAMS
           s3 s1 XCPU
           ADD
@@ -985,8 +986,8 @@ PROGRAM{
           24 PUSHINT
           NEWC
           6 STU
-          s1 s5 XCHG
-          256 STU
+          s0 s5 XCHG2
+          STSLICER
           s0 s3 XCHG2
           STGRAMS
           s1 s3 XCHG
