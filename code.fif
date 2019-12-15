@@ -843,8 +843,17 @@ PROGRAM{
         CHKSIGNU
         34 THROWIFNOT
         s0 s5 XCHG
+        LDREF
+        DROP
+        CTOS
+        DUP
+        HASHSU
+        SWAP
         32 LDU
-        s1 s5 PUSH2
+        256 LDU
+        LDGRAMS
+        DROP
+        s2 s7 PUSH2
         32 PUSHINT
         DICTUGET
         NULLSWAPIFNOT
@@ -868,9 +877,7 @@ PROGRAM{
         NOW
         LESS
         38 THROWIFNOT
-        s0 s4 XCHG
-        256 LDU
-        s1 s5 PUSH2
+        s5 s0 PUSH2
         8 PUSHPOW2
         DICTUGET
         NULLSWAPIFNOT
@@ -880,56 +887,41 @@ PROGRAM{
         9 PUSHPOW2
         LDSLICEX
         DROP
-        s0 s3 XCHG
-        LDREF
-        DROP
-        CTOS
-        DUP
-        HASHSU
-        s4 s1 PUXC
+        s10 s0 s0 XC2PU
         s0 17 s() XCHG
         CHKSIGNU
         40 THROWIFNOT
-        s0 s14 XCHG
-        32 LDU
-        s1 s9 XCPU
-        EQUAL
-        41 THROWIFNOT
-        256 LDU
-        s1 s4 XCPU
-        EQUAL
-        42 THROWIFNOT
         s10 s13 s11 PUSH3
         s12 s15 PUSH2
         pack_state INLINECALLDICT
         c4 POP
         COMMIT
         ACCEPT
-        LDGRAMS
-        DROP
-        s0 s4 PUXC
+        s5 s2 PUXC
         GEQ
-        s4 s14 PUSH2
+        s5 s8 PUSH2
         LEQ
         AND
         IF:<{
           NEWC
+          s1 s2 XCHG
           8 STU
-          s0 s13 XCHG2
+          s0 s7 XCHG2
           STGRAMS
           s0 s12 XCHG2
           STSLICER
-          SWAP
+          ROT
           STGRAMS
-          s0 s10 s3 XCHG3
+          s0 s0 s4 XCHG3
           8 PUSHPOW2
           DICTUSETB
         }>ELSE<{
-          s4 s13 XCHG
-          s5 s6 XCHG
+          s2 s13 XCHG
+          s3 s7 XCHG
+          s0 s5 XCHG
           5 BLKDROP
         }>
-        s2 s8 XCHG
+        s8 s8 s0 XCHG3
         s3 PUSH
         FALSE
         check_blind_bids CALLDICT
