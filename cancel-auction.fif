@@ -4,7 +4,6 @@
 { ."<contract> <seqno> <auction-id> [-O <output-boc>]" cr
   ."Cancels an auction <auction-id>, with address loaded from file <contract>.addr "
   ."and private key from <contract>.pk, and saves it into <output-boc>.boc ('<contract>-query.boc' by default)." cr
-  ."" cr
 } : usage()
 
 // == Parsing command-line arguments

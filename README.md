@@ -54,11 +54,11 @@ Owner of the auction contract can withdraw funds at any time on condition that t
 (external)
 
 ## Placing a bid
-`./place-bid.fif <contract-addr> <auction-id> <bid-amount> [-B <bid-filename>] [-O <output-boc>]`
+`./place-bid.fif <contract-addr> <wallet-addr> <auction-id> <bid-amount> [-B <bid-filename>] [-O <output-boc>]`
 (internal)
 
 ## Decrypt a bid
-`./decrypt-bid.fif <contract-addr> <seqno> <auction-id> [-B <bid-filename>] [-O <output-boc>]`
+`./decrypt-bid.fif <contract-addr> <seqno> [-B <bid-filename>] [-O <output-boc>]`
 (external)
 
 ## Pinging an auction

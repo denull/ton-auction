@@ -26,10 +26,10 @@ true =: BounceFlag
 ContractAddrRaw BounceFlag parse-load-address =: BounceFlag 2=: ContractAddr
 ."Contract address = " ContractAddr 2dup .addr cr 6 .Addr cr
 
-BidFile file>B 32 B| B>boc =: BidBody =: PrivateKey
-PrivateKey priv>pub =: PublicKey
+BidFile +".boc" file>B 32 B| B>boc =: BidBody =: PrivateKey
+PrivateKey ~ priv>pub =: PublicKey
 
-."Creating a decrypt request to an auction #" AuctionId . cr
+."Creating a decrypt request to an auction" cr
 
 // Pack the internal message into a request data structure to be signed
 <b
@@ -37,7 +37,7 @@ PrivateKey priv>pub =: PublicKey
   -1 32 i,      // valid_until
   102 32 u,     // op, 102 = decrypt a bid in a blind auction
   PublicKey B,
-  BidBody B,
+  BidBody ref,
 b> =: MessageBody
 
 ."Signing message: " MessageBody <s csr. cr

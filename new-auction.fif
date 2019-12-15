@@ -84,7 +84,7 @@ b> =: AuctionBody
 <b
   SeqNo 32 u,   // seqno
   -1 32 i,      // valid_until
-  2 32 u,       // action, 2 = create auction
+  2 32 u,       // op, 2 = create auction
   AuctionId 32 u,
   AuctionBody ref,
 b> =: MessageBody

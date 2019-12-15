@@ -1,49 +1,51 @@
 #!/usr/bin/env fift -s
 "auction-utils.fif" include
 
-{ ."<contract> <seqno> [-O <output-boc>]" cr
-  ."Starts a new auction via a smart contract created by init.fif, with address loaded from file <contract>.addr "
-  ."and private key from <contract>.pk, and saves it into <output-boc>.boc ('<contract>-query.boc' by default)." cr
-  ."" cr
+{ ."<auction-id> [<wallet-addr> <bid-amount> [-B <bid-filename>]] [-O <output-boc>]" cr
+  ."Prepares an internal message body to be sent to an auction from a wallet with address <wallet-addr>, containing a bid equal to <bid-amount>." cr
+  ."<wallet-addr>, <bid-amount> are only needed for blind auctions (auction_type=64..65)." cr
+  ."In case of a blind auction, writes the signature of the bid to the internal message: "
+  ."the actual bid is stored to <bid-filename>.boc ('bid.boc' by default), to be sent later via decrypt-bid.fif"
 } : usage()
 
 // == Parsing command-line arguments
 
 {
+  "-B" "--bid-filename" 1 { =: BidFile } option-long()
   "-O" "--output-file" 1 { =: SaveFile } option-long()
 
-  1 { =: BaseFile } nth-argument()
-  2 { parse-int =: SeqNo } nth-argument()
+  1 { parse-int =: AuctionId } nth-argument()
+  2 { =: WalletAddrRaw } nth-argument()
+  3 { $>GR =: BidAmount } nth-argument()
 } scan-args()
-1 < { show-usage() } if // Checks that there's enough arguments
+dup 1 < { show-usage() } if // Checks that there's enough arguments
+1 > =: IsBlind
 
 // == End of parsing command-line arguments
 
-BaseFile +"-query" =:? SaveFile
-BaseFile +".addr" load-address
-2dup 2constant ContractAddr
-."Contract address = " 2dup .addr cr 6 .Addr cr
+"bid" =:? BidFile
+"bid-query" =:? SaveFile
 
-BaseFile +".pk" load-keypair
-=: PrivateKey
-=: PublicKey
-
-."Creating new message ..." . cr
+."Placing a new bid to auction #" AuctionId . cr
 
 // Pack the internal message into a request data structure to be signed
 <b
-  SeqNo 32 u,   // seqno
-  -1 32 i,      // valid_until
-  0 32 u,       // action, 0 = none (init)
+  100 32 u,     // op, 100 = place a bid
+  AuctionId 32 u,
+  IsBlind {
+    newkeypair drop dup <b
+      AuctionId 32 u,
+      WalletAddrRaw true parse-load-address =: BounceFlag addr,
+      BidAmount Gram,
+    b> dup 2 boc+>B dup Bx. rot swap B+ cr
+    BidFile +".boc" tuck B>file
+    ."(Saved bid to file " type .")" cr
+
+    hashu swap ed25519_sign_uint B,
+  } if
 b> =: MessageBody
 
-."Signing message: " MessageBody <s csr. cr
-
-ContractAddr StateInit
-  MessageBody PrivateKey sign-message()
-external-message() =: ExtMessage
-
-."New external message: " ExtMessage <s csr. cr
-ExtMessage 2 boc+>B dup Bx. cr
+."Internal message body: " MessageBody <s csr. cr
+MessageBody 2 boc+>B dup Bx. cr
 SaveFile +".boc" tuck B>file
 ."(Saved to file " type .")" cr
