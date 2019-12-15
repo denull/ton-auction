@@ -1,8 +1,8 @@
 #!/usr/bin/env fift -s
 "auction-utils.fif" include
 
-{ ."<contract> <seqno> [-O <output-boc>]" cr
-  ."Starts a new auction via a smart contract created by init.fif, with address loaded from file <contract>.addr "
+{ ."<contract> <seqno> <auction-id> [-O <output-boc>]" cr
+  ."Cancels an auction <auction-id>, with address loaded from file <contract>.addr "
   ."and private key from <contract>.pk, and saves it into <output-boc>.boc ('<contract>-query.boc' by default)." cr
   ."" cr
 } : usage()
@@ -14,8 +14,9 @@
 
   1 { =: BaseFile } nth-argument()
   2 { parse-int =: SeqNo } nth-argument()
+  3 { parse-int =: AuctionId } nth-argument()
 } scan-args()
-1 < { show-usage() } if // Checks that there's enough arguments
+3 < { show-usage() } if // Checks that there's enough arguments
 
 // == End of parsing command-line arguments
 
@@ -28,18 +29,19 @@ BaseFile +".pk" load-keypair
 =: PrivateKey
 =: PublicKey
 
-."Creating new message ..." . cr
+."Cancelling auction #" AuctionId . cr
 
 // Pack the internal message into a request data structure to be signed
 <b
   SeqNo 32 u,   // seqno
   -1 32 i,      // valid_until
-  0 32 u,       // action, 0 = none (init)
+  2 32 u,       // action, 2 = cancel auction
+  AuctionId 32 u,
 b> =: MessageBody
 
 ."Signing message: " MessageBody <s csr. cr
 
-ContractAddr StateInit
+ContractAddr null
   MessageBody PrivateKey sign-message()
 external-message() =: ExtMessage
 
