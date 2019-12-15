@@ -1,45 +1,48 @@
 #!/usr/bin/env fift -s
 "auction-utils.fif" include
 
-{ ."<contract> <seqno> [-O <output-boc>]" cr
-  ."Starts a new auction via a smart contract created by init.fif, with address loaded from file <contract>.addr "
-  ."and private key from <contract>.pk, and saves it into <output-boc>.boc ('<contract>-query.boc' by default)." cr
-  ."" cr
+{ ."<contract-addr> <seqno> [-B <bid-filename>] [-O <output-boc>]" cr
+  ."Loads a bid to a blind auction with address <contract-addr>"
+  ." from <bid-filename> ('bid.boc' by default) and saves a decryption request with it "
+  ."into <output-boc>.boc ('decrypt-query.boc' by default)." cr
 } : usage()
 
 // == Parsing command-line arguments
 
 {
+  "-B" "--bid-filename" 1 { =: BidFile } option-long()
   "-O" "--output-file" 1 { =: SaveFile } option-long()
 
-  1 { =: BaseFile } nth-argument()
+  1 { =: ContractAddrRaw } nth-argument()
   2 { parse-int =: SeqNo } nth-argument()
 } scan-args()
-1 < { show-usage() } if // Checks that there's enough arguments
+2 < { show-usage() } if // Checks that there's enough arguments
 
 // == End of parsing command-line arguments
 
-BaseFile +"-query" =:? SaveFile
-BaseFile +".addr" load-address
-2dup 2constant ContractAddr
-."Contract address = " 2dup .addr cr 6 .Addr cr
+"bid" =:? BidFile
+"decrypt-query" =:? SaveFile
+true =: BounceFlag
+ContractAddrRaw BounceFlag parse-load-address =: BounceFlag 2=: ContractAddr
+."Contract address = " ContractAddr 2dup .addr cr 6 .Addr cr
 
-BaseFile +".pk" load-keypair
-=: PrivateKey
-=: PublicKey
+BidFile file>B 32 B| B>boc =: BidBody =: PrivateKey
+PrivateKey priv>pub =: PublicKey
 
-."Creating new message ..." . cr
+."Creating a decrypt request to an auction #" AuctionId . cr
 
 // Pack the internal message into a request data structure to be signed
 <b
   SeqNo 32 u,   // seqno
   -1 32 i,      // valid_until
-  0 32 u,       // action, 0 = none (init)
+  102 32 u,     // op, 102 = decrypt a bid in a blind auction
+  PublicKey B,
+  BidBody B,
 b> =: MessageBody
 
 ."Signing message: " MessageBody <s csr. cr
 
-ContractAddr StateInit
+ContractAddr null
   MessageBody PrivateKey sign-message()
 external-message() =: ExtMessage
 

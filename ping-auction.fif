@@ -1,10 +1,9 @@
 #!/usr/bin/env fift -s
 "auction-utils.fif" include
 
-{ ." <contract-addr> <seqno> <auction-id> [-O <output-boc>]" cr
-  ."Sends a ping to an auction <auction-id>, with address <contract-addr>"
+{ ."<contract-addr> <seqno> <auction-id> [-O <output-boc>]" cr
+  ."Creates a ping to an auction <auction-id>, with address <contract-addr>"
   .", and saves it into <output-boc>.boc ('ping-query.boc' by default)." cr
-  ."" cr
 } : usage()
 
 // == Parsing command-line arguments
