@@ -703,137 +703,12 @@ PROGRAM{
       pack_state INLINECALLDICT
       c4 POP
     }>
-    s8 POP
-    s8 POP
-    s9 POP
-    s4 PUSH
-    101 EQINT
-    IFJMP:<{
-      s0 s5 XCHG
-      32 LDU
-      DROP
-      s0 s3 PUSH2
-      32 PUSHINT
-      DICTUGET
-      NULLSWAPIFNOT
-      IFNOTJMP:<{
-        s5 s6 XCHG
-        6 BLKDROP
-        s3 POP
-        4294967294 PUSHINT
-        1 PUSHINT
-        0 PUSHINT
-        s4 s5 XCHG
-        s2 s4 XCHG
-        64 PUSHINT
-        send_message_back CALLDICT
-      }>
-      ~load_common_auction_fields CALLDICT
-      2DROP
-      s2 POP
-      NOW
-      GREATER
-      IFJMP:<{
-        s7 s8 XCHG
-        8 BLKDROP
-        s3 POP
-        4294967294 PUSHINT
-        3 PUSHINT
-        0 PUSHINT
-        s4 s5 XCHG
-        s2 s4 XCHG
-        64 PUSHINT
-        send_message_back CALLDICT
-      }>
-      0 PUSHINT
-      s0 s2 PUSH2
-      64 LESSINT
-      IF:<{
-        s3 POP
-        s0 s3 XCHG
-        LDGRAMS
-        NIP
-        LDGRAMS
-        NIP
-        LDGRAMS
-        OVER
-        0 EQINT
-        IFNOT:<{
-          s3 POP
-          s3 POP
-          SWAP
-          8 LDU
-          256 LDU
-          DROP
-          s3 s2 PUXC
-          SUB
-          s1 s12 XCHG
-          SUB
-        }>ELSE<{
-          s4 s13 XCHG
-          s4 s4 s0 XCHG3
-          2DROP
-        }>
-      }>ELSE<{
-        2DROP
-        s0 s2 XCHG
-        32 LDU
-        NIP
-        LDGRAMS
-        NIP
-        LDDICT
-        DROP
-        s0 s3 XCHG2
-        s0 s11 XCHG
-        TRUE
-        check_blind_bids CALLDICT
-        NIP
-        s3 s11 XCHG
-        s1 s2 XCHG
-      }>
-      NOW
-      0 LESSINT
-      IFJMP:<{
-        s7 s8 XCHG
-        8 BLKDROP
-        s3 POP
-        4294967294 PUSHINT
-        3 PUSHINT
-        0 PUSHINT
-        s4 s5 XCHG
-        s2 s4 XCHG
-        64 PUSHINT
-        send_message_back CALLDICT
-      }>
-      s3 s6 PUSH2
-      32 PUSHINT
-      DICTUGETOPTREF
-      s9 PUSH
-      s4 s5 XCPU
-      s0 s4 XCHG
-      s3 s14 XCHG
-      s0 s2 XCHG
-      send_auction_notification CALLDICT
-      s0 s3 XCHG2
-      32 PUSHINT
-      DICTUDELGET
-      NULLSWAPIFNOT
-      2DROP
-      4 1 REVERSE
-      s1 s7 s0 XCHG3
-      pack_state INLINECALLDICT
-      c4 POP
-      0 PUSHINT
-      s0 s0 PUSH2
-      s4 s5 XCHG
-      s2 s4 XCHG
-      64 PUSHINT
-      send_message_back CALLDICT
-    }>
-    s4 s5 XCHG
-    5 BLKDROP
+    s1 s6 XCHG
+    6 BLKDROP
+    s2 POP
+    s2 POP
     s3 POP
-    s2 PUSH
+    DUP
     31 PUSHPOW2
     AND
     IFNOTJMP:<{
@@ -842,6 +717,7 @@ PROGRAM{
       DUP
       s4 s5 XCHG
       s2 s4 XCHG
+      s2 s3 XCHG
       64 PUSHINT
       send_message_back CALLDICT
     }>
@@ -865,318 +741,413 @@ PROGRAM{
     s0 s3 XCHG
     INC
     s4 PUSH
-    102 EQINT
+    101 EQINT
     IF:<{
       s4 POP
       s0 s4 XCHG
       256 LDU
       s0 s7 XCHG
       HASHSU
-      s0 s8 s8 XC2PU
+      s0 s8 s8 XCHG3
       CHKSIGNU
       34 THROWIFNOT
-      s0 s5 XCHG
+      s0 s4 XCHG
       32 LDU
-      s1 s5 PUSH2
+      DROP
+      s0 s3 PUSH2
       32 PUSHINT
       DICTUGET
       NULLSWAPIFNOT
       35 THROWIFNOT
       ~load_common_auction_fields CALLDICT
-      DROP
-      s3 POP
-      s0 s4 XCHG
-      32 LDU
-      LDGRAMS
-      NIP
-      LDDICT
-      DROP
-      s4 PUSH
-      63 GTINT
-      36 THROWIFNOT
+      2DROP
+      s2 POP
       NOW
-      s1 s3 XCHG
       GREATER
-      37 THROWIFNOT
-      NOW
-      LESS
-      38 THROWIFNOT
-      s0 s4 XCHG
-      256 LDU
-      s1 s5 PUSH2
-      8 PUSHPOW2
-      DICTUGET
-      NULLSWAPIFNOT
-      39 THROWIFNOT
-      8 LDU
-      LDGRAMS
-      9 PUSHPOW2
-      LDSLICEX
-      DROP
-      s0 s3 XCHG
-      LDREF
-      DROP
-      CTOS
-      DUP
-      HASHSU
-      s4 s1 PUXC
-      s0 17 s() XCHG
-      CHKSIGNU
-      40 THROWIFNOT
-      s0 s14 XCHG
-      32 LDU
-      s1 s9 XCPU
-      EQUAL
-      41 THROWIFNOT
-      256 LDU
-      s1 s4 XCPU
-      EQUAL
-      42 THROWIFNOT
-      s10 s13 s11 PUSH3
-      s12 s15 PUSH2
-      pack_state INLINECALLDICT
-      c4 POP
-      COMMIT
-      ACCEPT
-      LDGRAMS
-      DROP
-      s0 s4 PUXC
-      GEQ
-      s4 s14 PUSH2
-      LEQ
-      AND
+      46 THROWIF
+      0 PUSHINT
+      s0 s2 PUSH2
+      64 LESSINT
       IF:<{
-        NEWC
-        8 STU
-        s0 s13 XCHG2
-        STGRAMS
-        s0 s12 XCHG2
-        STSLICER
-        SWAP
-        STGRAMS
-        s0 s10 s3 XCHG3
-        8 PUSHPOW2
-        DICTUSETB
-      }>ELSE<{
-        s4 s13 XCHG
-        s5 s6 XCHG
-        5 BLKDROP
-      }>
-      s2 s8 XCHG
-      s3 PUSH
-      FALSE
-      check_blind_bids CALLDICT
-      DROP
-      IF:<{
-        s8 s6 PUSH2
-        32 PUSHINT
-        DICTUGETOPTREF
-        s6 PUSH
-        s4 s10 XCPU
-        s4 s3 s4 XCHG3
-        send_auction_notification CALLDICT
-        s5 s3 XCHG2
-        32 PUSHINT
-        DICTUDELGET
-        NULLSWAPIFNOT
-        2DROP
-      }>ELSE<{
-        s4 s8 XCHG
-        s3 s6 XCHG
-        s3 s4 XCHG
-        4 BLKDROP
-      }>
-    }>ELSE<{
-      s0 s7 XCHG
-      HASHSU
-      s0 s8 s2 XC2PU
-      CHKSIGNU
-      43 THROWIFNOT
-      s5 s0 s6 PUSH3
-      s4 s7 PUSH2
-      pack_state INLINECALLDICT
-      c4 POP
-      COMMIT
-      ACCEPT
-      s2 PUSH
-      1 EQINT
-      IF:<{
-        s2 POP
-        0 PUSHINT
-        BALANCE
-        UNCONS
-        DROP
-        s0 s4 XCHG
-        WHILE:<{
-          DUP
-          SEMPTY
-          NOT
-        }>DO<{
-          264 PUSHINT
-          LDSLICEX
-          LDGRAMS
-          s3 s1 XCPU
-          ADD
-          s6 s0 PUSH2
-          SUB
-          s5 s(-1) PUXC
-          GEQ
-          44 THROWIF
-          0 PUSHINT
-          DUP
-          196 PUSHINT
-          NEWC
-          9 STU
-          s0 s5 XCHG2
-          STSLICER
-          s0 s3 XCHG2
-          STGRAMS
-          s1 s3 XCHG
-          107 STU
-          32 STU
-          ENDC
-          0 PUSHINT
-          SENDRAWMSG
+        s3 POP
+        ACCEPT
+        s0 s3 XCHG
+        LDGRAMS
+        NIP
+        LDGRAMS
+        NIP
+        LDGRAMS
+        OVER
+        0 EQINT
+        IFNOT:<{
+          s3 POP
+          s3 POP
           SWAP
+          8 LDU
+          256 LDU
+          DROP
+          s3 s2 PUXC
+          SUB
+          s1 s8 XCHG
+          SUB
+        }>ELSE<{
+          s4 s9 XCHG
+          s4 s4 s0 XCHG3
+          2DROP
         }>
-        2DROP
-        s2 POP
       }>ELSE<{
+        2DROP
+        s0 s2 XCHG
+        32 LDU
+        NOW
+        s1 s2 XCHG
+        GREATER
+        47 THROWIF
+        ACCEPT
+        LDGRAMS
+        NIP
+        LDDICT
+        DROP
+        s0 s3 XCHG2
+        s0 s7 XCHG
+        TRUE
+        check_blind_bids CALLDICT
+        NIP
+        s3 s7 XCHG
+        s1 s2 XCHG
+      }>
+      s3 s6 PUSH2
+      32 PUSHINT
+      DICTUGETOPTREF
+      s6 PUSH
+      s4 s5 XCPU
+      s0 s4 XCHG
+      s3 s10 XCHG
+      s0 s2 XCHG
+      send_auction_notification CALLDICT
+      s0 s3 XCHG2
+      32 PUSHINT
+      DICTUDELGET
+      NULLSWAPIFNOT
+      2DROP
+    }>ELSE<{
+      s4 PUSH
+      102 EQINT
+      IF:<{
+        s4 POP
+        s0 s4 XCHG
+        256 LDU
+        s0 s7 XCHG
+        HASHSU
+        s0 s8 s8 XC2PU
+        CHKSIGNU
+        34 THROWIFNOT
+        s0 s5 XCHG
+        32 LDU
+        s1 s5 PUSH2
+        32 PUSHINT
+        DICTUGET
+        NULLSWAPIFNOT
+        35 THROWIFNOT
+        ~load_common_auction_fields CALLDICT
+        DROP
+        s3 POP
+        s0 s4 XCHG
+        32 LDU
+        LDGRAMS
+        NIP
+        LDDICT
+        DROP
+        s4 PUSH
+        63 GTINT
+        36 THROWIFNOT
+        NOW
+        s1 s3 XCHG
+        GREATER
+        37 THROWIFNOT
+        NOW
+        LESS
+        38 THROWIFNOT
+        s0 s4 XCHG
+        256 LDU
+        s1 s5 PUSH2
+        8 PUSHPOW2
+        DICTUGET
+        NULLSWAPIFNOT
+        39 THROWIFNOT
+        8 LDU
+        LDGRAMS
+        9 PUSHPOW2
+        LDSLICEX
+        DROP
+        s0 s3 XCHG
+        LDREF
+        DROP
+        CTOS
+        DUP
+        HASHSU
+        s4 s1 PUXC
+        s0 17 s() XCHG
+        CHKSIGNU
+        40 THROWIFNOT
+        s0 s14 XCHG
+        32 LDU
+        s1 s9 XCPU
+        EQUAL
+        41 THROWIFNOT
+        256 LDU
+        s1 s4 XCPU
+        EQUAL
+        42 THROWIFNOT
+        s10 s13 s11 PUSH3
+        s12 s15 PUSH2
+        pack_state INLINECALLDICT
+        c4 POP
+        COMMIT
+        ACCEPT
+        LDGRAMS
+        DROP
+        s0 s4 PUXC
+        GEQ
+        s4 s14 PUSH2
+        LEQ
+        AND
+        IF:<{
+          NEWC
+          8 STU
+          s0 s13 XCHG2
+          STGRAMS
+          s0 s12 XCHG2
+          STSLICER
+          SWAP
+          STGRAMS
+          s0 s10 s3 XCHG3
+          8 PUSHPOW2
+          DICTUSETB
+        }>ELSE<{
+          s4 s13 XCHG
+          s5 s6 XCHG
+          5 BLKDROP
+        }>
+        s2 s8 XCHG
+        s3 PUSH
+        FALSE
+        check_blind_bids CALLDICT
+        DROP
+        IF:<{
+          s8 s6 PUSH2
+          32 PUSHINT
+          DICTUGETOPTREF
+          s6 PUSH
+          s4 s10 XCPU
+          s4 s3 s4 XCHG3
+          send_auction_notification CALLDICT
+          s5 s3 XCHG2
+          32 PUSHINT
+          DICTUDELGET
+          NULLSWAPIFNOT
+          2DROP
+        }>ELSE<{
+          s4 s8 XCHG
+          s3 s6 XCHG
+          s3 s4 XCHG
+          4 BLKDROP
+        }>
+      }>ELSE<{
+        s0 s7 XCHG
+        HASHSU
+        s0 s8 s2 XC2PU
+        CHKSIGNU
+        43 THROWIFNOT
+        s5 s0 s6 PUSH3
+        s4 s7 PUSH2
+        pack_state INLINECALLDICT
+        c4 POP
+        COMMIT
+        ACCEPT
         s2 PUSH
-        2 EQINT
+        1 EQINT
         IF:<{
           s2 POP
-          s0 s2 XCHG
-          32 LDU
-          LDREF
+          0 PUSHINT
+          BALANCE
+          UNCONS
           DROP
-          s1 s4 PUSH2
-          32 PUSHINT
-          DICTUGET
-          NULLSWAPIFNOT
-          NIP
-          45 THROWIF
-          s0 s1 s4 XCHG3
-          32 PUSHINT
-          DICTUSETREF
+          s0 s4 XCHG
+          WHILE:<{
+            DUP
+            SEMPTY
+            NOT
+          }>DO<{
+            264 PUSHINT
+            LDSLICEX
+            LDGRAMS
+            s3 s1 XCPU
+            ADD
+            s6 s0 PUSH2
+            SUB
+            s5 s(-1) PUXC
+            GEQ
+            44 THROWIF
+            0 PUSHINT
+            DUP
+            196 PUSHINT
+            NEWC
+            9 STU
+            s0 s5 XCHG2
+            STSLICER
+            s0 s3 XCHG2
+            STGRAMS
+            s1 s3 XCHG
+            107 STU
+            32 STU
+            ENDC
+            0 PUSHINT
+            SENDRAWMSG
+            SWAP
+          }>
+          2DROP
+          s2 POP
         }>ELSE<{
-          s0 s2 XCHG
-          3 EQINT
+          s2 PUSH
+          2 EQINT
           IF:<{
+            s2 POP
             s0 s2 XCHG
             32 LDU
+            LDREF
             DROP
-            s0 s3 PUSH2
+            s1 s4 PUSH2
             32 PUSHINT
             DICTUGET
             NULLSWAPIFNOT
-            35 THROWIFNOT
-            ~load_common_auction_fields CALLDICT
-            s2 s4 XCHG
-            4 BLKDROP
-            SWAP
-            64 LESSINT
+            NIP
+            45 THROWIF
+            s0 s1 s4 XCHG3
+            32 PUSHINT
+            DICTUSETREF
+          }>ELSE<{
+            s0 s2 XCHG
+            3 EQINT
             IF:<{
-              SWAP
-              LDGRAMS
-              NIP
-              LDGRAMS
-              OVER
-              0 GTINT
-              IF:<{
-                264 PUSHINT
-                LDSLICEX
-                DROP
-                s1 s2 PUSH2
-                SUB
-                s1 s6 XCHG
-                SUB
-                0 PUSHINT
-                DUP
-                196 PUSHINT
-                NEWC
-                9 STU
-                s0 s8 XCHG2
-                STSLICER
-                s3 s4 XCHG2
-                SUB
-                s1 s3 XCHG
-                STGRAMS
-                s1 s5 XCHG
-                107 STU
-                s1 s4 XCHG
-                32 STU
-                ENDC
-                0 PUSHINT
-                SENDRAWMSG
-              }>ELSE<{
-                3 BLKDROP
-              }>
-            }>ELSE<{
-              SWAP
-              LDDICT
+              s0 s2 XCHG
+              32 LDU
               DROP
-              -1 PUSHINT
-              UNTIL:<{
+              s0 s3 PUSH2
+              32 PUSHINT
+              DICTUGET
+              NULLSWAPIFNOT
+              35 THROWIFNOT
+              ~load_common_auction_fields CALLDICT
+              s2 s4 XCHG
+              4 BLKDROP
+              SWAP
+              64 LESSINT
+              IF:<{
+                SWAP
+                LDGRAMS
+                NIP
+                LDGRAMS
                 OVER
-                8 PUSHPOW2
-                DICTUGETNEXT
-                NULLSWAPIFNOT
-                NULLSWAPIFNOT
-                DUP
+                0 GTINT
                 IF:<{
-                  s0 s2 XCHG
-                  8 LDU
-                  LDGRAMS
+                  264 PUSHINT
+                  LDSLICEX
                   DROP
-                  s0 s5 PUSH2
+                  s1 s2 PUSH2
                   SUB
-                  s1 s9 XCHG
+                  s1 s6 XCHG
                   SUB
                   0 PUSHINT
                   DUP
                   196 PUSHINT
                   NEWC
                   9 STU
-                  s1 s4 XCHG
-                  8 STU
-                  s4 s(-1) PUXC
-                  256 STU
-                  s10 s7 XCPU
+                  s0 s8 XCHG2
+                  STSLICER
+                  s3 s4 XCHG2
                   SUB
-                  s1 s10 XCHG
+                  s1 s3 XCHG
                   STGRAMS
-                  s1 s2 XCHG
+                  s1 s5 XCHG
                   107 STU
-                  s1 s8 XCHG
+                  s1 s4 XCHG
                   32 STU
                   ENDC
                   0 PUSHINT
                   SENDRAWMSG
                 }>ELSE<{
-                  s2 POP
+                  3 BLKDROP
                 }>
+              }>ELSE<{
                 SWAP
-                NOT
+                LDDICT
+                DROP
+                -1 PUSHINT
+                UNTIL:<{
+                  OVER
+                  8 PUSHPOW2
+                  DICTUGETNEXT
+                  NULLSWAPIFNOT
+                  NULLSWAPIFNOT
+                  DUP
+                  IF:<{
+                    s0 s2 XCHG
+                    8 LDU
+                    LDGRAMS
+                    DROP
+                    s0 s5 PUSH2
+                    SUB
+                    s1 s9 XCHG
+                    SUB
+                    0 PUSHINT
+                    DUP
+                    196 PUSHINT
+                    NEWC
+                    9 STU
+                    s1 s4 XCHG
+                    8 STU
+                    s4 s(-1) PUXC
+                    256 STU
+                    s10 s7 XCPU
+                    SUB
+                    s1 s10 XCHG
+                    STGRAMS
+                    s1 s2 XCHG
+                    107 STU
+                    s1 s8 XCHG
+                    32 STU
+                    ENDC
+                    0 PUSHINT
+                    SENDRAWMSG
+                  }>ELSE<{
+                    s2 POP
+                  }>
+                  SWAP
+                  NOT
+                }>
+                3 BLKDROP
               }>
-              3 BLKDROP
+              s0 s3 XCHG2
+              32 PUSHINT
+              DICTUDELGET
+              NULLSWAPIFNOT
+              2DROP
+            }>ELSE<{
+              2SWAP
+              DROP
             }>
-            s0 s3 XCHG2
-            32 PUSHINT
-            DICTUDELGET
-            NULLSWAPIFNOT
-            2DROP
-          }>ELSE<{
-            2SWAP
-            DROP
           }>
+          s0 s2 XCHG
         }>
-        s0 s2 XCHG
+        s3 s4 XCHG
+        s1 s3 s3 XCHG3
       }>
       s3 s4 XCHG
-      s1 s3 s3 XCHG3
+      s2 s3 XCHG
     }>
-    s1 s2 XCHG
+    s2 s4 XCHG
+    s1 s3 s0 XCHG3
     pack_state INLINECALLDICT
     c4 POP
   }>

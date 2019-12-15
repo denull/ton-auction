@@ -277,53 +277,6 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
       return ();
     }
   }
-  if (op == 101) {
-    ;; Ping an auction (trigger winner selection if now() >= end_time or, for blind auctions, now() >= decrypt_time)
-    var auction_id = cs~load_uint(32);
-    var (auction, auction_found) = auctions.udict_get?(32, auction_id);
-    ifnot (auction_found) {
-      return send_message_back(src_addr_slice, 0xfffffffe, query_id, op, 1, 0, 64);
-    }
-
-    var (auction_type, start_time, end_time, bidding_fee, initial_price, buyout_price) = auction~load_common_auction_fields();
-    if (end_time > now()) { ;; => auction is not yet finished
-      return send_message_back(src_addr_slice, 0xfffffffe, query_id, op, 3, 0, 64);
-    }
-    var winner_wc = 0;
-    var winner_addr = 0;
-    var winner_bid = 0;
-    var decrypt_time = 0;
-    if (auction_type < 64) {
-      ;; English auction
-      var initial_price = auction~load_grams();
-      var minimum_step = auction~load_grams();
-      winner_bid = auction~load_grams();
-      ifnot (winner_bid == 0) {
-        winner_wc = auction~load_uint(8);
-        winner_addr = auction~load_uint(256);
-        reserved_balance = reserved_balance - (winner_bid - bidding_fee);
-      }
-    } else {
-      ;; Blind auction
-      var decrypt_time = auction~load_uint(32);
-      var fixed_amount = auction~load_grams();
-      var bids = auction~load_dict();
-      (winner_wc, winner_addr, winner_bid, var all_decrypted, reserved_balance) = check_blind_bids(auction_type, bidding_fee, bids, reserved_balance, true);
-    }
-
-    if (decrypt_time > now()) { ;; => auction's decryption stage is not yet finished
-      return send_message_back(src_addr_slice, 0xfffffffe, query_id, op, 3, 0, 64);
-    }
-
-    ;; Remove auction from state, send notification
-    send_auction_notification(notification_addr, auction_id, winner_wc, winner_addr, winner_bid, auctions.udict_get_ref(32, auction_id));
-    auctions~udict_delete_get?(32, auction_id);
-
-    set_data(pack_state(stored_seqno, owner_pubkey, notification_addr, reserved_balance, auctions));
-    
-    ;; Return unused money
-    return send_message_back(src_addr_slice, 0, query_id, op, 0, 0, 64);
-  }
 
   ifnot (op & (1 << 31)) {
     ;; unknown query, return error
@@ -341,7 +294,46 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
   throw_unless(33, msg_seqno == stored_seqno);
   stored_seqno = stored_seqno + 1;
 
-  if (op == 102) {
+  if (op == 101) {
+    ;; Ping an auction (trigger winner selection if now() >= end_time or, for blind auctions, now() >= decrypt_time)
+    var current_pubkey = cs~load_uint(256);
+    throw_unless(34, check_signature(slice_hash(in_msg), signature, current_pubkey));
+    
+    var auction_id = cs~load_uint(32);
+    var (auction, auction_found) = auctions.udict_get?(32, auction_id);
+    throw_unless(35, auction_found);
+
+    var (auction_type, start_time, end_time, bidding_fee, initial_price, buyout_price) = auction~load_common_auction_fields();
+    throw_if(46, end_time > now()); ;; => auction is not yet finished
+    var winner_wc = 0;
+    var winner_addr = 0;
+    var winner_bid = 0;
+    var decrypt_time = 0;
+    if (auction_type < 64) {
+      accept_message();
+      ;; English auction
+      var initial_price = auction~load_grams();
+      var minimum_step = auction~load_grams();
+      winner_bid = auction~load_grams();
+      ifnot (winner_bid == 0) {
+        winner_wc = auction~load_uint(8);
+        winner_addr = auction~load_uint(256);
+        reserved_balance = reserved_balance - (winner_bid - bidding_fee);
+      }
+    } else {
+      ;; Blind auction
+      var decrypt_time = auction~load_uint(32);
+      throw_if(47, decrypt_time > now()); ;; => auction's decryption stage is not yet finished
+      accept_message();
+      var fixed_amount = auction~load_grams();
+      var bids = auction~load_dict();
+      (winner_wc, winner_addr, winner_bid, var all_decrypted, reserved_balance) = check_blind_bids(auction_type, bidding_fee, bids, reserved_balance, true);
+    }
+
+    ;; Remove auction from state, send notification
+    send_auction_notification(notification_addr, auction_id, winner_wc, winner_addr, winner_bid, auctions.udict_get_ref(32, auction_id));
+    auctions~udict_delete_get?(32, auction_id);
+  } elseif (op == 102) {
     ;; Decrypt an encrypted bid (in a blind auction)
     var current_pubkey = cs~load_uint(256);
     throw_unless(34, check_signature(slice_hash(in_msg), signature, current_pubkey));
