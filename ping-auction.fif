@@ -1,9 +1,9 @@
 #!/usr/bin/env fift -s
 "auction-utils.fif" include
 
-{ ."<contract> <seqno> [-O <output-boc>]" cr
-  ."Starts a new auction via a smart contract created by init.fif, with address loaded from file <contract>.addr "
-  ."and private key from <contract>.pk, and saves it into <output-boc>.boc ('<contract>-query.boc' by default)." cr
+{ ." <contract-addr> <seqno> <auction-id> [-O <output-boc>]" cr
+  ."Sends a ping to an auction <auction-id>, with address <contract-addr>"
+  .", and saves it into <output-boc>.boc ('ping-query.boc' by default)." cr
   ."" cr
 } : usage()
 
@@ -12,34 +12,38 @@
 {
   "-O" "--output-file" 1 { =: SaveFile } option-long()
 
-  1 { =: BaseFile } nth-argument()
+  1 { =: ContractAddrRaw } nth-argument()
   2 { parse-int =: SeqNo } nth-argument()
+  3 { parse-int =: AuctionId } nth-argument()
 } scan-args()
-1 < { show-usage() } if // Checks that there's enough arguments
+3 < { show-usage() } if // Checks that there's enough arguments
 
 // == End of parsing command-line arguments
 
-BaseFile +"-query" =:? SaveFile
-BaseFile +".addr" load-address
-2dup 2constant ContractAddr
-."Contract address = " 2dup .addr cr 6 .Addr cr
+"ping-query" =:? SaveFile
+true =: BounceFlag
+ContractAddrRaw BounceFlag parse-load-address =: BounceFlag 2=: ContractAddr
+."Contract address = " ContractAddr 2dup .addr cr 6 .Addr cr
 
-BaseFile +".pk" load-keypair
-=: PrivateKey
+// Make a temporary keypair just for this request
+newkeypair
 =: PublicKey
+=: PrivateKey
 
-."Creating new message ..." . cr
+."Pinging an auction #" AuctionId . cr
 
 // Pack the internal message into a request data structure to be signed
 <b
   SeqNo 32 u,   // seqno
   -1 32 i,      // valid_until
-  0 32 u,       // action, 0 = none (init)
+  101 32 u,     // op, 101 = ping auction
+  PublicKey B,
+  AuctionId 32 u,
 b> =: MessageBody
 
 ."Signing message: " MessageBody <s csr. cr
 
-ContractAddr StateInit
+ContractAddr null
   MessageBody PrivateKey sign-message()
 external-message() =: ExtMessage
 
