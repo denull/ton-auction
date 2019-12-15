@@ -2,7 +2,7 @@
 () send_message_back(slice addr, ans_tag, query_id, body, extra, grams, mode) impure {
   ;; int_msg_info$0 ihr_disabled:Bool bounce:Bool bounced:Bool src:MsgAddress -> 011000
   var msg = begin_cell()
-    .store_uint(0x18, 6)
+    .store_uint(0xc4, 9)
     .store_slice(addr)
     .store_grams(grams)
     .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
@@ -85,7 +85,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
         reserved_balance = reserved_balance - (received_amount - bidding_fee);
 
         send_raw_message(begin_cell()
-          .store_uint(0x18, 6)
+          .store_uint(0xc4, 9)
           .store_uint(wc, 8)
           .store_uint(bidder_addr, 256)
           .store_grams(received_amount - bidding_fee)
@@ -113,7 +113,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
     reserved_balance = reserved_balance - (winner_received - bidding_fee);
 
     send_raw_message(begin_cell()
-      .store_uint(0x18, 6)
+      .store_uint(0xc4, 9)
       .store_uint(winner_wc, 8)
       .store_uint(winner_addr, 256)
       .store_grams(winner_received - winner_bid)
@@ -146,12 +146,11 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
   if (flags & 1) { ;; ignore bounced
     return ();
   }
-  slice src_addr_slice = cs~load_msg_addr();
-  int src_wc = src_addr_slice~load_uint(8);
-  int src_addr = src_addr_slice~load_uint(256);
   if (in_msg.slice_empty?()) {
     return ();
   }
+  slice src_addr_slice = cs~load_msg_addr();
+  var (src_wc, src_addr) = parse_std_addr(src_addr_slice);
   var op = cs~load_uint(32);
   if (op == 0) {
     return ();
@@ -200,7 +199,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
         ;; Replace current bidder, return him his bid
         var current_addr = auction~load_bits(256 + 8);
         send_raw_message(begin_cell()
-          .store_uint(0x18, 6)
+          .store_uint(0xc4, 9)
           .store_slice(current_addr)
           .store_grams(current_price - bidding_fee)
           .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
@@ -407,10 +406,10 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
         var amount = cs~load_grams();
 
         transfer_balance += amount;
-        throw_unless(44, reserved_balance >= total_balance - transfer_balance);
+        throw_if(44, reserved_balance >= total_balance - transfer_balance);
 
         send_raw_message(begin_cell()
-          .store_uint(0x18, 6)
+          .store_uint(0xc4, 9)
           .store_slice(addr)
           .store_grams(amount)
           .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
@@ -439,7 +438,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
           var current_addr = auction~load_bits(256 + 8);
           reserved_balance = reserved_balance - (current_price - bidding_fee);
           send_raw_message(begin_cell()
-            .store_uint(0x18, 6)
+            .store_uint(0xc4, 9)
             .store_slice(current_addr)
             .store_grams(current_price - bidding_fee)
             .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
@@ -457,7 +456,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
             reserved_balance = reserved_balance - (received_amount - bidding_fee);
 
             send_raw_message(begin_cell()
-              .store_uint(0x18, 6)
+              .store_uint(0xc4, 9)
               .store_uint(wc, 8)
               .store_uint(bidder_addr, 256)
               .store_grams(received_amount - bidding_fee)

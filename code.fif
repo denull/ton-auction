@@ -11,9 +11,9 @@ PROGRAM{
   85143 DECLMETHOD seqno
   send_message_back PROC:<{
     0 PUSHINT
-    24 PUSHINT
+    196 PUSHINT
     NEWC
-    6 STU
+    9 STU
     s0 s8 XCHG2
     STSLICER
     ROT
@@ -170,9 +170,9 @@ PROGRAM{
           SUB
           0 PUSHINT
           DUP
-          24 PUSHINT
+          196 PUSHINT
           NEWC
-          6 STU
+          9 STU
           s1 s5 XCHG
           8 STU
           s5 s(-1) PUXC
@@ -237,9 +237,9 @@ PROGRAM{
       SUB
       0 PUSHINT
       DUP
-      24 PUSHINT
+      196 PUSHINT
       NEWC
-      6 STU
+      9 STU
       s5 s(-1) PUXC
       8 STU
       s7 s(-1) PUXC
@@ -298,15 +298,14 @@ PROGRAM{
     IFJMP:<{
       3 BLKDROP
     }>
-    LDMSGADDR
     SWAP
-    8 LDU
-    256 LDU
-    s0 s4 XCHG
     SEMPTY
     IFJMP:<{
-      5 BLKDROP
+      2DROP
     }>
+    LDMSGADDR
+    OVER
+    REWRITESTDADDR
     s0 s2 XCHG
     32 LDU
     OVER
@@ -482,9 +481,9 @@ PROGRAM{
           DROP
           0 PUSHINT
           DUP
-          24 PUSHINT
+          196 PUSHINT
           NEWC
-          6 STU
+          9 STU
           s0 s3 XCHG2
           STSLICER
           s10 s3 XCPU
@@ -1022,12 +1021,12 @@ PROGRAM{
           SUB
           s5 s(-1) PUXC
           GEQ
-          44 THROWIFNOT
+          44 THROWIF
           0 PUSHINT
           DUP
-          24 PUSHINT
+          196 PUSHINT
           NEWC
-          6 STU
+          9 STU
           s0 s5 XCHG2
           STSLICER
           s0 s3 XCHG2
@@ -1094,9 +1093,9 @@ PROGRAM{
                 SUB
                 0 PUSHINT
                 DUP
-                24 PUSHINT
+                196 PUSHINT
                 NEWC
-                6 STU
+                9 STU
                 s0 s8 XCHG2
                 STSLICER
                 s3 s4 XCHG2
@@ -1136,9 +1135,9 @@ PROGRAM{
                   SUB
                   0 PUSHINT
                   DUP
-                  24 PUSHINT
+                  196 PUSHINT
                   NEWC
-                  6 STU
+                  9 STU
                   s1 s4 XCHG
                   8 STU
                   s4 s(-1) PUXC
