@@ -33,36 +33,40 @@ This should rebuild files `code-getters.fif` (full version of the contract) and 
 
 This contract allows you to conduct any number of simultaneous auctions. Each auction is defined by the initial price, (optionally) the buyout price, bidding fee, start and end time, and other configuration params. Note that by setting the initial price equal to the buyout price, this can be turned into a simple trading process.
 
-While an auction is active, anyone can place a bid by sending an external message to this contract. If the attached amount of grams is above the current price, it's accepted, and the previous top bid is cancelled (it's amount, minus the bidding fee, is returned to the bidder).
+While an auction is active, anyone can place a bid by sending an internal message to this contract. If the attached amount of grams is above the current price, it's accepted, and the previous top bid is cancelled (its amount, minus the bidding fee, is returned to the bidder).
 
-Auction ends at the specified end time, or if the current price reaches the buyout price. At that moment a log message is generated (to notify some off-chain script about auction completion).
+Auction ends at the specified end time, or if the current price reaches the buyout price. At that moment a special internal message to a predefined "notification address" is generated (to notify some other contract about the completion). Note that the actual transfer of goods to the winner is the responsibility of that contract (or some off-chain script monitoring the blockchain state).
 
-Special case: blind auctions. In this case every participant submits an external message with a fixed amount of grams, with the actual bid value encrypted by some random key. For some predefined time after the auction ends, those keys are collected from participants, their bids are decrypted and the winner is determined.
+Special case: blind auctions. In this case every participant submits an internal message with a fixed amount of grams, and attaches to a signature of his actual bid. For some predefined time after the auction end, participants provide their bids (and their public keys, so the original signatures can be validated), so the winner can be determined. All non-winning bids are fully returned (minus bidding fees), and winner receives only the difference between the amount he sent and his actual bid.
 
 Owner of the auction contract can withdraw funds at any time on condition that the remaining balance is at least equal to the sum of all currently active top bids (so they can be always returned).
 
 ## Initialising a new contract
-`./init.fif [<filename-base>] [-C <code-fif>]`
+`./init.fif <workchain-id> <notification-addr> [<filename-base>] [-C <code-fif>]`
 (external)
 
 ## Starting a new auction
-`./new-auction.fif`
+`./new-auction.fif <contract> <seqno> <auction-id> <auction-type> <end-time> [<decrypt-time> <fixed-amount>] [-s <minimum-step>] [-t <start-time>] [-f <bidding-fee>] [-i <initial-price>] [-b <buyout-price>] [-O <output-boc>]`
+(external)
+
+## Cancelling an auction
+`./cancel-auction.fif <contract> <seqno> <auction-id> [-O <output-boc>]`
 (external)
 
 ## Placing a bid
-`./place-bid.fif`
+`./place-bid.fif <contract-addr> <auction-id> <bid-amount> [-B <bid-filename>] [-O <output-boc>]`
 (internal)
 
 ## Decrypt a bid
-`./decrypt-bid.fif`
+`./decrypt-bid.fif <contract-addr> <seqno> [-B <bid-filename>] [-O <output-boc>]`
 (external)
 
 ## Pinging an auction
-`./ping-auction.fif`
+`./ping-auction.fif <contract-addr> <seqno> <auction-id> [-O <output-boc>]`
 (external)
 
 ## Withdrawing funds from the contract
-`./withdraw.fif`
+`./withdraw.fif <contract> <dest-addr> <seqno> <amount> [-O <output-boc>]`
 (external)
 
 # Get methods

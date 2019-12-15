@@ -1,7 +1,7 @@
 #!/usr/bin/env fift -s
 "auction-utils.fif" include
 
-{ ."<contract> <dest-addr> <seqno> <amount> [-B <body-boc>] [-O <output-boc>] [-b] [-M <send-mode>]" cr
+{ ."<contract> <dest-addr> <seqno> <amount> [-O <output-boc>]" cr
   ."Creates a money withdrawal request to an auction contract, with address loaded from file <contract>.addr "
   ."and private keys from <contract>.pk, and saves it into <output-boc>.boc ('<contract>-query.boc' by default)." cr
   ."Switch -b disables bounce flag (enabled by default), and option -M allows to set send mode for future message."
@@ -10,10 +10,7 @@
 // == Parsing command-line arguments
 
 {
-  "-B" "--body-file" 1 { =: BodyFile } option-long()
   "-O" "--output-file" 1 { =: SaveFile } option-long()
-  "-M" "--send-mode" 1 { parse-int =: SendMode } option-long()
-  "-b" "--no-bounce" { false =: BounceFlag } switch-long()
 
   1 { =: BaseFile } nth-argument()
   2 { =: DestRaw } nth-argument()
@@ -25,8 +22,7 @@
 
 // == End of parsing command-line arguments
 
-true =:? BounceFlag
-3 =:? SendMode
+true =: BounceFlag
 DestRaw BounceFlag parse-load-address =: BounceFlag 2=: DestAddr
 BaseFile +"-query" =:? SaveFile
 
@@ -45,7 +41,7 @@ BaseFile +".pk" load-keypair
 =: PublicKey
 
 ."Creating new order to transfer " Amount .GR ."to account " DestAddr 2dup BounceFlag 7 + .Addr ." = " .addr 
-."seqno=0x" SeqNo x. ."bounce=" BounceFlag . cr
+."seqno=0x" SeqNo x. cr
 
 ."Body of transfer message is " TransferBody <s csr. cr
 
