@@ -89,6 +89,7 @@ PROGRAM{
       DUP
       IF:<{
         s0 s2 XCHG
+        8 LDU
         LDGRAMS
         9 PUSHPOW2
         LDSLICEX
@@ -96,11 +97,10 @@ PROGRAM{
         DUP
         SDEMPTY
         IF:<{
-          2DROP
+          3 BLKDROP
           s2 POP
           FALSE
         }>ELSE<{
-          8 LDU
           LDGRAMS
           DROP
           s0 s7 PUSH2
@@ -113,15 +113,14 @@ PROGRAM{
             s5 PUSH
           }>ELSE<{
             s3 s9 XCHG
-            s6 s8 XCHG
-            s3 s7 XCHG
-            s3 s6 XCHG
+            s3 s8 XCHG
+            s6 s7 XCHG
             3 BLKDROP
           }>
-          s4 s6 XCHG
+          s5 s6 XCHG
           s0 s5 XCHG
           s3 s4 XCHG
-          s3 s1 s3 XCHG3
+          s0 s2 XCHG
         }>
       }>ELSE<{
         2SWAP

@@ -1,0 +1,112 @@
+;; These are useful methods, however they take precious bytes of storage.
+;; It's still possible to call them w/o uploading to TON.
+
+tuple auction_tuple(int auction_type, int start_time, int end_time, int bidding_fee, int initial_price, int buyout_price, int minimum_step, int decrypt_time, int fixed_amount)
+  asm(auction_type start_time end_time bidding_fee initial_price buyout_price minimum_step decrypt_time fixed_amount) "9 TUPLE";
+
+tuple bid_tuple(int bidder_wc, int bidder_addr, int received_amount, int actual_amount)
+  asm(bidder_wc bidder_addr received_amount actual_amount) "4 TUPLE";
+
+;; Returns owner's pubkey
+
+int owner_pubkey() method_id {
+  var ds = get_data().begin_parse().skip_bits(32);
+  return ds~load_uint(256);
+}
+
+;; Returns notification addr
+
+slice notification_addr() method_id {
+  var ds = get_data().begin_parse().skip_bits(32 + 256);
+  return ds~load_bits(8 + 256);
+}
+
+;; Returns reserved amount
+
+int reserved_amount() method_id {
+  var ds = get_data().begin_parse().skip_bits(32 + 256 + 8 + 256);
+  return ds~load_grams();
+}
+
+;; Returns list of all active auctions
+
+_ auctions() method_id {
+  var ds = get_data().begin_parse();
+  var auctions = ds~load_dict();
+  if (auctions.null?()) {
+    return nil;
+  }
+
+  var l = nil;
+  var id = -1;
+  do {
+    (id, var auction, var f) = auctions.udict_get_prev?(32, id);
+    if (f) {
+      var (auction_type, start_time, end_time, bidding_fee, initial_price, buyout_price) = (
+        auction~load_uint(8),
+        auction~load_uint(32), auction~load_uint(32), 
+        auction~load_grams(), auction~load_grams(), auction~load_grams()
+      );
+      var minimum_step = 0;
+      var decrypt_time = 0;
+      var fixed_amount = 0;
+      if (auction_type < 64) {
+        minimum_step = auction~load_grams();
+      } else {
+        decrypt_time = auction~load_uint(32);
+        fixed_amount = auction~load_grams();
+      }
+      l = cons(auction_tuple(auction_type, start_time, end_time, bidding_fee, initial_price, buyout_price, minimum_step, decrypt_time, fixed_amount), l);
+    }
+  } until (~ f);
+  return l;
+}
+
+;; Returns list of all bidders in a blind auction or a top bidder in an open auction
+
+_ bidders(int auction_id) method_id {
+  var ds = get_data().begin_parse();
+  var auctions = ds~load_dict();
+  if (auctions.null?()) {
+    return nil;
+  }
+
+  var (auction, auction_found) = auctions.udict_get?(32, auction_id);
+  throw_unless(36, auction_found);
+
+  var (auction_type, start_time, end_time, bidding_fee, initial_price, buyout_price) = (
+    auction~load_uint(8),
+    auction~load_uint(32), auction~load_uint(32), 
+    auction~load_grams(), auction~load_grams(), auction~load_grams()
+  );
+
+  var l = nil;
+  if (auction_type < 64) {
+    var received_amount = auction~load_grams();
+    if (received_amount != 0) {
+      var bidder_addr_slice = auction~load_bits(256 + 8);
+      var (bidder_wc, bidder_addr) = parse_std_addr(bidder_addr_slice);
+      l = cons(bid_tuple(bidder_wc, bidder_addr, received_amount, received_amount), l);
+    }
+    return l;
+  }
+
+  var bids = auction~load_dict();
+  var bidder_addr = (1 << 255) + ((1 << 255) - 1);
+  do {
+    (bidder_addr, var bid, var f) = bids.udict_get_prev?(256, bidder_addr);
+    if (f) {
+      var (bidder_wc, received_amount) = (
+        bid~load_uint(32),
+        bid~load_grams()
+      );
+      var actual_amount = 0;
+      var bid_signature = bid~load_bits(512);
+      ifnot (bid.slice_data_empty?()) {
+        actual_amount = bid~load_grams();
+      }
+      l = cons(bid_tuple(bidder_wc, bidder_addr, received_amount, actual_amount), l);
+    }
+  } until (~ f);
+  return l;
+}

@@ -52,10 +52,10 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
   do {
     (bidder_addr, var bid, var f) = bids.udict_get_next?(256, bidder_addr);
     if (f) {
+      var wc = bid~load_uint(8);
       var received_amount = bid~load_grams();
       var bid_signature = bid~load_bits(512);
       ifnot (bid.slice_data_empty?()) {
-        var wc = bid~load_uint(8);
         var actual_amount = bid~load_grams();
         if (actual_amount > winner_bid) {
           ;; TODO: handle case when there's two equal top bids (the first one wins?)

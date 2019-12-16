@@ -9,6 +9,11 @@ PROGRAM{
   DECLPROC recv_internal
   DECLPROC recv_external
   85143 DECLMETHOD seqno
+  77822 DECLMETHOD owner_pubkey
+  78650 DECLMETHOD notification_addr
+  116643 DECLMETHOD reserved_amount
+  84475 DECLMETHOD auctions
+  104366 DECLMETHOD bidders
   send_message_back PROC:<{
     0 PUSHINT
     196 PUSHINT
@@ -89,6 +94,7 @@ PROGRAM{
       DUP
       IF:<{
         s0 s2 XCHG
+        8 LDU
         LDGRAMS
         9 PUSHPOW2
         LDSLICEX
@@ -96,11 +102,10 @@ PROGRAM{
         DUP
         SDEMPTY
         IF:<{
-          2DROP
+          3 BLKDROP
           s2 POP
           FALSE
         }>ELSE<{
-          8 LDU
           LDGRAMS
           DROP
           s0 s7 PUSH2
@@ -113,15 +118,14 @@ PROGRAM{
             s5 PUSH
           }>ELSE<{
             s3 s9 XCHG
-            s6 s8 XCHG
-            s3 s7 XCHG
-            s3 s6 XCHG
+            s3 s8 XCHG
+            s6 s7 XCHG
             3 BLKDROP
           }>
-          s4 s6 XCHG
+          s5 s6 XCHG
           s0 s5 XCHG
           s3 s4 XCHG
-          s3 s1 s3 XCHG3
+          s0 s2 XCHG
         }>
       }>ELSE<{
         2SWAP
@@ -1139,5 +1143,177 @@ PROGRAM{
     c4 PUSH
     CTOS
     32 PLDU
+  }>
+  owner_pubkey PROC:<{
+    c4 PUSH
+    CTOS
+    32 PUSHINT
+    SDSKIPFIRST
+    256 LDU
+    DROP
+  }>
+  notification_addr PROC:<{
+    c4 PUSH
+    CTOS
+    288 PUSHINT
+    SDSKIPFIRST
+    264 PUSHINT
+    LDSLICEX
+    DROP
+  }>
+  reserved_amount PROC:<{
+    c4 PUSH
+    CTOS
+    552 PUSHINT
+    SDSKIPFIRST
+    LDGRAMS
+    DROP
+  }>
+  auctions PROC:<{
+    c4 PUSH
+    CTOS
+    LDDICT
+    DROP
+    DUP
+    ISNULL
+    IFJMP:<{
+      DROP
+      PUSHNULL
+    }>
+    PUSHNULL
+    -1 PUSHINT
+    UNTIL:<{
+      s2 PUSH
+      32 PUSHINT
+      DICTUGETPREV
+      NULLSWAPIFNOT
+      NULLSWAPIFNOT
+      DUP
+      IF:<{
+        s0 s2 XCHG
+        8 LDU
+        32 LDU
+        32 LDU
+        LDGRAMS
+        LDGRAMS
+        LDGRAMS
+        0 PUSHINT
+        s0 s0 s7 PUSH3
+        64 LESSINT
+        IF:<{
+          s2 POP
+          s0 s2 XCHG
+          LDGRAMS
+          DROP
+        }>ELSE<{
+          2DROP
+          SWAP
+          32 LDU
+          LDGRAMS
+          DROP
+          ROT
+        }>
+        -ROT
+        9 TUPLE
+        s0 s3 XCHG2
+        CONS
+      }>ELSE<{
+        2SWAP
+        DROP
+      }>
+      SWAP
+      NOT
+      s1 s2 XCHG
+    }>
+    DROP
+    NIP
+  }>
+  bidders PROC:<{
+    c4 PUSH
+    CTOS
+    LDDICT
+    DROP
+    DUP
+    ISNULL
+    IFJMP:<{
+      2DROP
+      PUSHNULL
+    }>
+    32 PUSHINT
+    DICTUGET
+    NULLSWAPIFNOT
+    36 THROWIFNOT
+    8 LDU
+    32 LDU
+    NIP
+    32 LDU
+    NIP
+    LDGRAMS
+    NIP
+    LDGRAMS
+    NIP
+    LDGRAMS
+    NIP
+    PUSHNULL
+    s0 s2 XCHG
+    64 LESSINT
+    IFJMP:<{
+      LDGRAMS
+      OVER
+      0 NEQINT
+      IF:<{
+        264 PUSHINT
+        LDSLICEX
+        DROP
+        REWRITESTDADDR
+        s0 s2 s0 XC2PU
+        4 TUPLE
+        SWAP
+        CONS
+      }>ELSE<{
+        2DROP
+      }>
+    }>
+    LDDICT
+    DROP
+    256 PUSHPOW2DEC
+    UNTIL:<{
+      OVER
+      8 PUSHPOW2
+      DICTUGETPREV
+      NULLSWAPIFNOT
+      NULLSWAPIFNOT
+      DUP
+      IF:<{
+        s0 s2 XCHG
+        32 LDU
+        LDGRAMS
+        0 PUSHINT
+        SWAP
+        9 PUSHPOW2
+        LDSLICEX
+        NIP
+        DUP
+        SDEMPTY
+        IFNOT:<{
+          NIP
+          LDGRAMS
+          DROP
+        }>ELSE<{
+          DROP
+        }>
+        s3 s(-1) s(-1) PUXC2
+        4 TUPLE
+        s0 s4 XCHG2
+        CONS
+      }>ELSE<{
+        s4 s2 XCHG2
+        DROP
+      }>
+      SWAP
+      NOT
+      s1 s3 XCHG
+    }>
+    2DROP
   }>
 }END>c
