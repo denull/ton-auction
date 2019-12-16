@@ -437,18 +437,17 @@ PROGRAM{
         LDGRAMS
         OVER
         0 EQINT
-        s2 s3 PUXC
+        s2 s3 PUSH2
         ADD
-        22 s() PUSH
+        23 s() PUSH
         SWAP
         LESS
-        s1 s3 XCHG
         AND
         IFJMP:<{
-          s10 s12 XCHG
+          s11 s12 XCHG
           12 BLKDROP
-          s0 s3 XCHG
-          3 BLKDROP
+          s0 s4 XCHG
+          4 BLKDROP
           s2 POP
           s3 POP
           s3 POP
@@ -460,16 +459,16 @@ PROGRAM{
           64 PUSHINT
           send_message_back CALLDICT
         }>
-        s10 POP
-        s15 POP
-        s8 PUSH
+        s11 POP
+        16 s() POP
+        s15 PUSH
         0 EQINT
         IFNOT:<{
-          s8 s1 PUSH2
+          s15 s2 PUSH2
           SUB
-          s1 s10 XCHG
+          s1 s11 XCHG
           SUB
-          s0 s14 XCHG
+          s0 s9 XCHG
           264 PUSHINT
           LDSLICEX
           DROP
@@ -480,76 +479,73 @@ PROGRAM{
           9 STU
           s0 s3 XCHG2
           STSLICER
-          s10 s3 XCPU
+          s0 17 s() XCHG
+          s4 PUSH
           SUB
-          s1 s10 XCHG
+          s1 17 s() XCHG
           STGRAMS
           107 STU
-          s1 s8 XCHG
+          s1 s15 XCHG
           32 STU
           ENDC
           0 PUSHINT
           SENDRAWMSG
         }>ELSE<{
-          s9 s14 XCHG
-          s8 s9 XCHG2
-          2DROP
+          s15 s10 XCHG2
+          s9 POP
+          DROP
         }>
-        s3 PUSH
-        NOT
+        s0 s4 XCHG
         IF:<{
-          16 s() PUSH
-          s7 PUSH
-          SUB
-          s1 s13 XCHG
-          ADD
-          NEWC
-          s1 s3 XCHG
-          8 STU
-          32 STU
-          s1 s11 XCHG
-          32 STU
-          s0 s4 XCHG2
-          STGRAMS
-          s0 s4 XCHG2
-          STGRAMS
-          s0 s3 XCHG2
-          STGRAMS
-          s11 PUSH
-          STGRAMS
-          s0 s9 XCHG2
-          STSLICER
-          SWAP
-          32 PUSHINT
-          s1 s6 s6 PUXC2
-          DICTUSETB
-        }>ELSE<{
-          s3 s14 XCHG
-          s5 s11 XCHG
-          s5 s7 XCHG
-          7 BLKDROP
-        }>
-        s0 s7 XCHG
-        IF:<{
-          s3 s6 PUSH2
+          5 BLKDROP
+          s2 POP
+          s6 POP
+          s7 POP
+          s6 s3 PUSH2
           32 PUSHINT
           DICTUGETOPTREF
           s1 s0 s3 PUXC2
-          s5 PUSH
+          s8 PUSH
           s0 s4 XCHG
           s3 s8 XCHG
           s10 s11 s10 XCHG3
           send_auction_notification CALLDICT
-          s0 s3 XCHG2
+          s1 s3 XCHG
           32 PUSHINT
           DICTUDELGET
           NULLSWAPIFNOT
           2DROP
         }>ELSE<{
-          s8 s7 s0 XCHG3
-          s4 s6 XCHG
-          s5 POP
-          3 BLKDROP
+          s13 POP
+          s14 POP
+          s14 s1 PUSH2
+          SUB
+          s1 s5 XCHG
+          ADD
+          NEWC
+          s1 s5 XCHG
+          8 STU
+          s1 s13 XCHG
+          32 STU
+          s1 s10 XCHG
+          32 STU
+          s0 s11 XCHG2
+          STGRAMS
+          s0 s7 XCHG2
+          STGRAMS
+          s0 s7 XCHG2
+          STGRAMS
+          s0 s6 XCHG2
+          STGRAMS
+          s0 s8 XCHG2
+          STGRAMS
+          s0 s5 XCHG2
+          STSLICER
+          s0 s5 s5 XCHG3
+          32 PUSHINT
+          DICTUSETB
+          s2 s4 XCHG
+          s2 s3 XCHG
         }>
         s1 s2 XCHG
         pack_state INLINECALLDICT
@@ -619,60 +615,12 @@ PROGRAM{
       s12 POP
       17 s() POP
       18 s() POP
-      s6 PUSH
-      NOT
+      s0 s6 XCHG
       IF:<{
-        19 s() PUSH
-        s3 PUSH
-        SUB
-        s1 s11 XCHG
-        ADD
-        s0 s7 XCHG
-        9 PUSHPOW2
-        LDSLICEX
-        DROP
-        16 s() PUSH
-        NEWC
-        8 STU
-        20 s() PUSH
-        STGRAMS
-        SWAP
-        STSLICER
-        SWAP
-        8 PUSHPOW2
-        19 s() PUSH
-        s0 s11 s11 XCHG3
-        DICTUSETB
-        NEWC
-        s1 s5 XCHG
-        8 STU
-        s1 s3 XCHG
-        32 STU
-        32 STU
-        SWAP
-        STGRAMS
-        s0 s5 XCHG2
-        STGRAMS
-        s0 s5 XCHG2
-        STGRAMS
-        s1 s11 XCHG
-        32 STU
-        s0 s8 XCHG2
-        STGRAMS
-        STDICT
-        SWAP
-        32 PUSHINT
-        s7 s6 s6 PUXC2
-        DICTUSETB
-      }>ELSE<{
-        s10 17 s() XCHG
-        s8 s15 XCHG
-        s6 s14 XCHG
-        s6 s10 XCHG
-        10 BLKDROP
-      }>
-      s0 s4 XCHG
-      IF:<{
+        s7 s8 XCHG
+        8 BLKDROP
+        s6 POP
+        s7 POP
         s4 s3 PUSH2
         32 PUSHINT
         DICTUGETOPTREF
@@ -687,9 +635,50 @@ PROGRAM{
         NULLSWAPIFNOT
         2DROP
       }>ELSE<{
-        s8 s7 s5 XCHG3
+        18 s() PUSH
+        s2 PUSH
+        SUB
+        s1 s10 XCHG
+        ADD
+        s0 s6 XCHG
+        9 PUSHPOW2
+        LDSLICEX
+        DROP
+        NEWC
+        s1 16 s() XCHG
+        8 STU
+        SWAP
+        s0 18 s() XCHG
+        STGRAMS
+        s0 s14 XCHG2
+        STSLICER
+        s0 s15 s6 XCHG3
+        8 PUSHPOW2
+        DICTUSETB
+        NEWC
+        s1 s5 XCHG
+        8 STU
+        s1 s13 XCHG
+        32 STU
+        s1 s10 XCHG
+        32 STU
+        s0 s12 XCHG2
+        STGRAMS
+        ROT
+        STGRAMS
+        s0 s9 XCHG2
+        STGRAMS
+        s1 s7 XCHG
+        32 STU
+        s0 s4 XCHG2
+        STGRAMS
+        s1 s6 XCHG
+        STDICT
+        s0 s6 s6 XCHG3
+        32 PUSHINT
+        DICTUSETB
         s3 s4 XCHG
-        4 BLKDROP
+        s1 s2 XCHG
       }>
       s1 s2 XCHG
       pack_state INLINECALLDICT

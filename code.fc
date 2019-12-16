@@ -207,7 +207,12 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
         .end_cell(), 0);
       }
 
-      if (~ is_won) {
+      if (is_won) {
+        ;; Remove auction from state, send notification
+        send_auction_notification(notification_addr, auction_id, src_wc, src_addr, msg_value, auctions.udict_get_ref(32, auction_id));
+        auctions~udict_delete_get?(32, auction_id);
+      } else {
+        ;; Return previous top bid
         reserved_balance = reserved_balance + (msg_value - bidding_fee);
 
         auctions~udict_set_builder(32, auction_id, begin_cell()
@@ -217,14 +222,9 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
           .store_grams(bidding_fee)
           .store_grams(initial_price)
           .store_grams(buyout_price)
+          .store_grams(minimum_step)
           .store_grams(msg_value)
           .store_slice(src_addr_slice));
-      }
-
-      if (is_won) {
-        ;; Remove auction from state, send notification
-        send_auction_notification(notification_addr, auction_id, src_wc, src_addr, msg_value, auctions.udict_get_ref(32, auction_id));
-        auctions~udict_delete_get?(32, auction_id);
       }
 
       set_data(pack_state(stored_seqno, owner_pubkey, notification_addr, reserved_balance, auctions));
@@ -244,7 +244,12 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
       if (~ is_won & bid_found) { ;; => already participated in this auction (not allowed in blind auctions)
         return send_message_back(src_addr_slice, 0xfffffffe, query_id, op, 8, 0, 64);
       }
-      if (~ is_won) {
+
+      if (is_won) {
+        ;; Remove auction from state, send notification
+        send_auction_notification(notification_addr, auction_id, src_wc, src_addr, msg_value, auctions.udict_get_ref(32, auction_id));
+        auctions~udict_delete_get?(32, auction_id);
+      } else {
         ;; Add to bidders
         reserved_balance = reserved_balance + (msg_value - bidding_fee);
         var bid_signature = in_msg~load_bits(512);
@@ -265,12 +270,6 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
           .store_uint(decrypt_time, 32)
           .store_grams(fixed_amount)
           .store_dict(bids));
-      }
-
-      if (is_won) {
-        ;; Remove auction from state, send notification
-        send_auction_notification(notification_addr, auction_id, src_wc, src_addr, msg_value, auctions.udict_get_ref(32, auction_id));
-        auctions~udict_delete_get?(32, auction_id);
       }
 
       set_data(pack_state(stored_seqno, owner_pubkey, notification_addr, reserved_balance, auctions));
