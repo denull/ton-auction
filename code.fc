@@ -411,7 +411,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
       var auction_data = cs~load_ref();
       var (auction, auction_found) = auctions.udict_get?(32, auction_id);
       throw_if(45, auction_found);
-      auctions~udict_set_ref(32, auction_id, auction_data);
+      auctions~udict_set(32, auction_id, auction_data.begin_parse());
     } elseif (op == 3) {
       ;; Cancel an auction
       var auction_id = cs~load_uint(32);

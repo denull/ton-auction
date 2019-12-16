@@ -1006,9 +1006,10 @@ PROGRAM{
             NULLSWAPIFNOT
             NIP
             45 THROWIF
+            CTOS
             s0 s1 s4 XCHG3
             32 PUSHINT
-            DICTUSETREF
+            DICTUSET
           }>ELSE<{
             s0 s2 XCHG
             3 EQINT

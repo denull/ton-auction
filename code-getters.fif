@@ -1011,9 +1011,10 @@ PROGRAM{
             NULLSWAPIFNOT
             NIP
             45 THROWIF
+            CTOS
             s0 s1 s4 XCHG3
             32 PUSHINT
-            DICTUSETREF
+            DICTUSET
           }>ELSE<{
             s0 s2 XCHG
             3 EQINT
@@ -1172,6 +1173,10 @@ PROGRAM{
   auctions PROC:<{
     c4 PUSH
     CTOS
+    552 PUSHINT
+    SDSKIPFIRST
+    LDGRAMS
+    NIP
     LDDICT
     DROP
     DUP
@@ -1181,7 +1186,7 @@ PROGRAM{
       PUSHNULL
     }>
     PUSHNULL
-    -1 PUSHINT
+    31 PUSHPOW2DEC
     UNTIL:<{
       s2 PUSH
       32 PUSHINT
