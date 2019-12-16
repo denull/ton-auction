@@ -11,9 +11,9 @@ PROGRAM{
   85143 DECLMETHOD seqno
   send_message_back PROC:<{
     0 PUSHINT
-    196 PUSHINT
+    24 PUSHINT
     NEWC
-    9 STU
+    6 STU
     s0 s8 XCHG2
     STSLICER
     ROT
@@ -184,7 +184,7 @@ PROGRAM{
           107 STU
           32 STU
           ENDC
-          0 PUSHINT
+          3 PUSHINT
           SENDRAWMSG
           s0 s9 XCHG
           9 PUSHPOW2
@@ -252,7 +252,7 @@ PROGRAM{
       s1 s6 XCHG
       32 STU
       ENDC
-      0 PUSHINT
+      3 PUSHINT
       SENDRAWMSG
     }>ELSE<{
       s3 s6 XCHG
@@ -284,7 +284,7 @@ PROGRAM{
     STGRAMS
     STDICT
     ENDC
-    1 PUSHINT
+    3 PUSHINT
     SENDRAWMSG
   }>
   recv_internal PROC:<{
@@ -436,7 +436,7 @@ PROGRAM{
         LDGRAMS
         LDGRAMS
         OVER
-        0 EQINT
+        0 NEQINT
         s2 s3 PUSH2
         ADD
         23 s() PUSH
@@ -461,14 +461,15 @@ PROGRAM{
         }>
         s11 POP
         16 s() POP
-        s15 PUSH
+        17 s() POP
+        s14 PUSH
         0 EQINT
         IFNOT:<{
-          s15 s2 PUSH2
+          s14 s1 PUSH2
           SUB
-          s1 s11 XCHG
+          s1 s10 XCHG
           SUB
-          s0 s9 XCHG
+          s0 s8 XCHG
           264 PUSHINT
           LDSLICEX
           DROP
@@ -479,25 +480,25 @@ PROGRAM{
           9 STU
           s0 s3 XCHG2
           STSLICER
-          s0 17 s() XCHG
-          s4 PUSH
+          s0 16 s() XCHG
+          s3 PUSH
           SUB
-          s1 17 s() XCHG
+          s1 16 s() XCHG
           STGRAMS
           107 STU
-          s1 s15 XCHG
+          s1 s14 XCHG
           32 STU
           ENDC
-          0 PUSHINT
+          3 PUSHINT
           SENDRAWMSG
         }>ELSE<{
-          s15 s10 XCHG2
-          s9 POP
+          s14 s9 XCHG2
+          s8 POP
           DROP
         }>
-        s0 s4 XCHG
+        s0 s3 XCHG
         IF:<{
-          5 BLKDROP
+          4 BLKDROP
           s2 POP
           s6 POP
           s7 POP
@@ -516,36 +517,35 @@ PROGRAM{
           NULLSWAPIFNOT
           2DROP
         }>ELSE<{
-          s13 POP
-          s14 POP
-          s14 s1 PUSH2
+          s15 s11 PUSH2
           SUB
-          s1 s5 XCHG
+          s1 s6 XCHG
           ADD
           NEWC
-          s1 s5 XCHG
+          s1 s2 XCHG
           8 STU
-          s1 s13 XCHG
+          s1 s5 XCHG
           32 STU
-          s1 s10 XCHG
           32 STU
-          s0 s11 XCHG2
+          s0 s9 XCHG2
+          STGRAMS
+          s0 s3 XCHG2
           STGRAMS
           s0 s7 XCHG2
-          STGRAMS
-          s0 s7 XCHG2
-          STGRAMS
-          s0 s6 XCHG2
           STGRAMS
           s0 s8 XCHG2
           STGRAMS
-          s0 s5 XCHG2
-          STSLICER
-          s0 s5 s5 XCHG3
+          s0 s9 XCHG2
+          STGRAMS
+          s1 s5 XCHG
+          8 STU
+          s1 s6 XCHG
+          256 STU
+          s0 s4 s4 XCHG3
           32 PUSHINT
           DICTUSETB
-          s2 s4 XCHG
-          s2 s3 XCHG
+          s3 s4 XCHG
+          s1 s3 XCHG
         }>
         s1 s2 XCHG
         pack_state INLINECALLDICT
@@ -974,7 +974,7 @@ PROGRAM{
             107 STU
             32 STU
             ENDC
-            0 PUSHINT
+            3 PUSHINT
             SENDRAWMSG
             SWAP
           }>
@@ -1047,7 +1047,7 @@ PROGRAM{
                   s1 s4 XCHG
                   32 STU
                   ENDC
-                  0 PUSHINT
+                  3 PUSHINT
                   SENDRAWMSG
                 }>ELSE<{
                   3 BLKDROP
@@ -1091,7 +1091,7 @@ PROGRAM{
                     s1 s8 XCHG
                     32 STU
                     ENDC
-                    0 PUSHINT
+                    3 PUSHINT
                     SENDRAWMSG
                   }>ELSE<{
                     s2 POP

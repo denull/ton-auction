@@ -2,7 +2,7 @@
 () send_message_back(slice addr, ans_tag, query_id, body, extra, grams, mode) impure {
   ;; int_msg_info$0 ihr_disabled:Bool bounce:Bool bounced:Bool src:MsgAddress -> 011000
   var msg = begin_cell()
-    .store_uint(0xc4, 9)
+    .store_uint(0x18, 6)
     .store_slice(addr)
     .store_grams(grams)
     .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
@@ -91,7 +91,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
           .store_grams(received_amount - bidding_fee)
           .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
           .store_uint(0, 32) ;; Simple money transfer
-        .end_cell(), 0);
+        .end_cell(), 3);
 
         var bid_signature = bid~load_bits(512);
         ifnot (bid.slice_data_empty?()) {
@@ -119,7 +119,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
       .store_grams(winner_received - winner_bid)
       .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
       .store_uint(0, 32) ;; Simple money transfer
-    .end_cell(), 0);
+    .end_cell(), 3);
   }
 
   return (winner_wc, winner_addr, winner_bid, all_decrypted, reserved_balance);
@@ -137,7 +137,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
     .store_uint(winner_addr, 256) ;; Bidder addr (can be 0 if there was no bids!)
     .store_grams(winner_bid)      ;; Winning bid amount
     .store_dict(auction)          ;; Detailed info about auction (before this bid)
-  .end_cell(), 1);
+  .end_cell(), 3);
 }
 
 () recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
@@ -189,7 +189,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
 
       var minimum_step = auction~load_grams();
       var current_price = auction~load_grams();
-      if ((current_price == 0) & (msg_value < current_price + minimum_step)) { ;; => attached value is not enough to outbid current top bidder
+      if ((current_price != 0) & (msg_value < current_price + minimum_step)) { ;; => attached value is not enough to outbid current top bidder
         return send_message_back(src_addr_slice, 0xfffffffe, query_id, op, 6, 0, 64);
       }
 
@@ -204,7 +204,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
           .store_grams(current_price - bidding_fee)
           .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
           .store_uint(0, 32) ;; Simple money transfer
-        .end_cell(), 0);
+        .end_cell(), 3);
       }
 
       if (is_won) {
@@ -212,7 +212,6 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
         send_auction_notification(notification_addr, auction_id, src_wc, src_addr, msg_value, auctions.udict_get_ref(32, auction_id));
         auctions~udict_delete_get?(32, auction_id);
       } else {
-        ;; Return previous top bid
         reserved_balance = reserved_balance + (msg_value - bidding_fee);
 
         auctions~udict_set_builder(32, auction_id, begin_cell()
@@ -224,7 +223,8 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
           .store_grams(buyout_price)
           .store_grams(minimum_step)
           .store_grams(msg_value)
-          .store_slice(src_addr_slice));
+          .store_uint(src_wc, 8)
+          .store_uint(src_addr, 256));
       }
 
       set_data(pack_state(stored_seqno, owner_pubkey, notification_addr, reserved_balance, auctions));
@@ -402,7 +402,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
           .store_grams(amount)
           .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
           .store_uint(0, 32) ;; Simple money transfer
-        .end_cell(), 0);
+        .end_cell(), 3);
       }
     } elseif (op == 2) {
       ;; Create new auction
@@ -431,7 +431,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
             .store_grams(current_price - bidding_fee)
             .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
             .store_uint(0, 32) ;; Simple money transfer
-          .end_cell(), 0);
+          .end_cell(), 3);
         }
       } else {
         var bids = auction~load_dict();
@@ -450,7 +450,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
               .store_grams(received_amount - bidding_fee)
               .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
               .store_uint(0, 32) ;; Simple money transfer
-            .end_cell(), 0);
+            .end_cell(), 3);
           }
         } until (~ f);
       }
