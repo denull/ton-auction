@@ -289,8 +289,8 @@ PROGRAM{
     SENDRAWMSG
   }>
   recv_internal PROC:<{
-    NIP
-    DUP
+    SWAP
+    CTOS
     4 LDU
     SWAP
     1 PUSHINT
@@ -298,15 +298,16 @@ PROGRAM{
     IFJMP:<{
       3 BLKDROP
     }>
-    SWAP
+    OVER
     SEMPTY
     IFJMP:<{
-      2DROP
+      3 BLKDROP
     }>
     LDMSGADDR
-    OVER
+    DROP
+    DUP
     REWRITESTDADDR
-    s0 s2 XCHG
+    s0 s3 XCHG
     32 LDU
     OVER
     0 EQINT
@@ -328,14 +329,13 @@ PROGRAM{
         s3 s8 XCHG
         8 BLKDROP
         s2 POP
-        s2 POP
+        s3 POP
         s3 POP
         4294967294 PUSHINT
         1 PUSHINT
         0 PUSHINT
-        s4 s5 XCHG
+        s3 s5 XCHG
         s2 s4 XCHG
-        s2 s3 XCHG
         64 PUSHINT
         send_message_back CALLDICT
       }>
@@ -349,14 +349,13 @@ PROGRAM{
         NIP
         NIP
         s2 POP
-        s2 POP
+        s3 POP
         s3 POP
         4294967294 PUSHINT
         2 PUSHINT
         0 PUSHINT
-        s4 s5 XCHG
+        s3 s5 XCHG
         s2 s4 XCHG
-        s2 s3 XCHG
         64 PUSHINT
         send_message_back CALLDICT
       }>
@@ -369,14 +368,13 @@ PROGRAM{
         NIP
         NIP
         s2 POP
-        s2 POP
+        s3 POP
         s3 POP
         4294967294 PUSHINT
         3 PUSHINT
         0 PUSHINT
-        s4 s5 XCHG
+        s3 s5 XCHG
         s2 s4 XCHG
-        s2 s3 XCHG
         64 PUSHINT
         send_message_back CALLDICT
       }>
@@ -389,14 +387,13 @@ PROGRAM{
         NIP
         NIP
         s2 POP
-        s2 POP
+        s3 POP
         s3 POP
         4294967294 PUSHINT
         4 PUSHINT
         0 PUSHINT
-        s4 s5 XCHG
+        s3 s5 XCHG
         s2 s4 XCHG
-        s2 s3 XCHG
         64 PUSHINT
         send_message_back CALLDICT
       }>
@@ -426,14 +423,13 @@ PROGRAM{
           NIP
           NIP
           s2 POP
-          s2 POP
+          s3 POP
           s3 POP
           4294967294 PUSHINT
           5 PUSHINT
           0 PUSHINT
-          s4 s5 XCHG
+          s3 s5 XCHG
           s2 s4 XCHG
-          s2 s3 XCHG
           64 PUSHINT
           send_message_back CALLDICT
         }>
@@ -455,14 +451,13 @@ PROGRAM{
           s0 s3 XCHG
           3 BLKDROP
           s2 POP
-          s2 POP
+          s3 POP
           s3 POP
           4294967294 PUSHINT
           6 PUSHINT
           0 PUSHINT
-          s4 s5 XCHG
+          s3 s5 XCHG
           s2 s4 XCHG
-          s2 s3 XCHG
           64 PUSHINT
           send_message_back CALLDICT
         }>
@@ -523,41 +518,41 @@ PROGRAM{
           STGRAMS
           s11 PUSH
           STGRAMS
-          s0 s10 XCHG2
+          s0 s9 XCHG2
           STSLICER
           SWAP
           32 PUSHINT
           s1 s6 s6 PUXC2
           DICTUSETB
         }>ELSE<{
-          s3 s15 XCHG
+          s3 s14 XCHG
           s5 s11 XCHG
           s5 s7 XCHG
           7 BLKDROP
         }>
-        s0 s8 XCHG
+        s0 s7 XCHG
         IF:<{
-          s3 s7 PUSH2
+          s3 s6 PUSH2
           32 PUSHINT
           DICTUGETOPTREF
           s1 s0 s3 PUXC2
           s5 PUSH
           s0 s4 XCHG
           s3 s8 XCHG
-          s9 s11 s9 XCHG3
+          s10 s11 s10 XCHG3
           send_auction_notification CALLDICT
-          s0 s4 XCHG2
+          s0 s3 XCHG2
           32 PUSHINT
           DICTUDELGET
           NULLSWAPIFNOT
           2DROP
         }>ELSE<{
-          s2 s8 XCHG
-          s4 s7 XCHG
-          s6 s5 XCHG2
-          4 BLKDROP
+          s8 s7 s0 XCHG3
+          s4 s6 XCHG
+          s5 POP
+          3 BLKDROP
         }>
-        s1 s3 s0 XCHG3
+        s1 s2 XCHG
         pack_state INLINECALLDICT
         c4 POP
       }>
@@ -572,14 +567,13 @@ PROGRAM{
         s0 s5 XCHG
         5 BLKDROP
         s2 POP
-        s2 POP
+        s3 POP
         s3 POP
         4294967294 PUSHINT
         7 PUSHINT
         0 PUSHINT
-        s4 s5 XCHG
+        s3 s5 XCHG
         s2 s4 XCHG
-        s2 s3 XCHG
         64 PUSHINT
         send_message_back CALLDICT
       }>
@@ -598,7 +592,7 @@ PROGRAM{
       s0 s9 XCHG
       LDDICT
       DROP
-      20 s() PUSH
+      21 s() PUSH
       OVER
       8 PUSHPOW2
       DICTUGET
@@ -613,20 +607,19 @@ PROGRAM{
         s0 s5 XCHG
         5 BLKDROP
         s2 POP
-        s2 POP
+        s3 POP
         s3 POP
         4294967294 PUSHINT
         8 PUSHINT
         0 PUSHINT
-        s4 s5 XCHG
+        s3 s5 XCHG
         s2 s4 XCHG
-        s2 s3 XCHG
         64 PUSHINT
         send_message_back CALLDICT
       }>
       s12 POP
       17 s() POP
-      19 s() POP
+      18 s() POP
       s6 PUSH
       NOT
       IF:<{
@@ -648,7 +641,7 @@ PROGRAM{
         STSLICER
         SWAP
         8 PUSHPOW2
-        18 s() PUSH
+        19 s() PUSH
         s0 s11 s11 XCHG3
         DICTUSETB
         NEWC
@@ -663,7 +656,7 @@ PROGRAM{
         STGRAMS
         s0 s5 XCHG2
         STGRAMS
-        s1 s12 XCHG
+        s1 s11 XCHG
         32 STU
         s0 s8 XCHG2
         STGRAMS
@@ -673,7 +666,7 @@ PROGRAM{
         s7 s6 s6 PUXC2
         DICTUSETB
       }>ELSE<{
-        s10 18 s() XCHG
+        s10 17 s() XCHG
         s8 s15 XCHG
         s6 s14 XCHG
         s6 s10 XCHG
@@ -688,36 +681,35 @@ PROGRAM{
         s6 PUSH
         s0 s4 XCHG
         s3 s8 XCHG
-        s9 s11 s9 XCHG3
+        s10 s11 s10 XCHG3
         send_auction_notification CALLDICT
         32 PUSHINT
         DICTUDELGET
         NULLSWAPIFNOT
         2DROP
       }>ELSE<{
-        s8 s6 s5 XCHG3
+        s8 s7 s5 XCHG3
         s3 s4 XCHG
         4 BLKDROP
       }>
-      s1 s3 s0 XCHG3
+      s1 s2 XCHG
       pack_state INLINECALLDICT
       c4 POP
     }>
     s1 s6 XCHG
     6 BLKDROP
     s2 POP
-    s2 POP
     s3 POP
-    DUP
+    s3 POP
+    OVER
     31 PUSHPOW2
     AND
     IFNOTJMP:<{
       32 PUSHPOW2DEC
       0 PUSHINT
       DUP
-      s4 s5 XCHG
+      s3 s5 XCHG
       s2 s4 XCHG
-      s2 s3 XCHG
       64 PUSHINT
       send_message_back CALLDICT
     }>

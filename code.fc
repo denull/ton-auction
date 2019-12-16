@@ -141,7 +141,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
 }
 
 () recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
-  var cs = in_msg;
+  var cs = in_msg_cell.begin_parse();
   var flags = cs~load_uint(4);  ;; int_msg_info$0 ihr_disabled:Bool bounce:Bool bounced:Bool
   if (flags & 1) { ;; ignore bounced
     return ();
@@ -151,15 +151,15 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
   }
   slice src_addr_slice = cs~load_msg_addr();
   var (src_wc, src_addr) = parse_std_addr(src_addr_slice);
-  var op = cs~load_uint(32);
+  var op = in_msg~load_uint(32);
   if (op == 0) {
     return ();
   }
   var (stored_seqno, owner_pubkey, notification_addr, reserved_balance, auctions) = unpack_state();
-  int query_id = cs~load_uint(64);
+  int query_id = in_msg~load_uint(64);
   if (op == 100) {
     ;; Place a bid
-    var auction_id = cs~load_uint(32);
+    var auction_id = in_msg~load_uint(32);
     var (auction, auction_found) = auctions.udict_get?(32, auction_id);
     ifnot (auction_found) {
       return send_message_back(src_addr_slice, 0xfffffffe, query_id, op, 1, 0, 64);
@@ -247,7 +247,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
       if (~ is_won) {
         ;; Add to bidders
         reserved_balance = reserved_balance + (msg_value - bidding_fee);
-        var bid_signature = cs~load_bits(512);
+        var bid_signature = in_msg~load_bits(512);
 
         ;; Store encrypted bid for later
         bids~udict_set_builder(256, src_addr, begin_cell()
