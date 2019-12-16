@@ -31,16 +31,18 @@ int reserved_amount() method_id {
 ;; Returns list of all active auctions
 
 _ auctions() method_id {
-  var ds = get_data().begin_parse();
+  var ds = get_data().begin_parse().skip_bits(32 + 256 + 8 + 256);
+  ds~load_grams();
   var auctions = ds~load_dict();
   if (auctions.null?()) {
     return nil;
   }
 
   var l = nil;
-  var id = -1;
+  var id = 0x7fffffff;
+  var f = true;
   do {
-    (id, var auction, var f) = auctions.udict_get_prev?(32, id);
+    (id, var auction, f) = auctions.udict_get_prev?(32, id);
     if (f) {
       var (auction_type, start_time, end_time, bidding_fee, initial_price, buyout_price) = (
         auction~load_uint(8),
