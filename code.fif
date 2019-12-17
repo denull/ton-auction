@@ -6,7 +6,7 @@ PROGRAM{
   DECLPROC pack_state
   DECLPROC unpack_state
   DECLPROC check_blind_bids
-  DECLPROC complete_auction
+  DECLPROC ~complete_auction
   DECLPROC recv_internal
   DECLPROC recv_external
   85143 DECLMETHOD seqno
@@ -260,13 +260,12 @@ PROGRAM{
     4 1 REVERSE
     ROT
   }>
-  complete_auction PROC:<{
+  ~complete_auction PROC:<{
     32 PUSHINT
     s5 s6 s6 PUXC2
     DICTUDELGET
     NULLSWAPIFNOT
     DROP
-    NIP
     NEWC
     SWAP
     STSLICER
@@ -276,21 +275,22 @@ PROGRAM{
     196 PUSHINT
     NEWC
     9 STU
-    s0 s6 XCHG2
+    s0 s7 XCHG2
     STSLICER
     30 PUSHPOW2
     STGRAMS
-    s1 s5 XCHG
+    s1 s6 XCHG
     107 STU
-    s1 s4 XCHG
+    s1 s5 XCHG
     32 STU
-    s1 s4 XCHG
+    s1 s5 XCHG
     64 STU
-    8 STU
     s1 s2 XCHG
+    8 STU
     256 STU
-    ROT
+    s0 s3 XCHG2
     STGRAMS
+    s1 s2 XCHG
     STREF
     ENDC
     3 PUSHINT
@@ -497,11 +497,11 @@ PROGRAM{
           s2 POP
           s6 POP
           s7 POP
-          s3 PUSH
-          s3 s7 XCHG
-          s1 s0 s2 PUXC2
-          s7 s9 s10 XCHG3
-          complete_auction CALLDICT
+          s3 s4 XCHG
+          s3 s6 XCHG
+          s5 s0 s2 XCPUXC
+          s8 s9 XCHG2
+          ~complete_auction CALLDICT
         }>ELSE<{
           s15 s11 PUSH2
           SUB
@@ -530,10 +530,9 @@ PROGRAM{
           s0 s4 s4 XCHG3
           32 PUSHINT
           DICTUSETB
-          s3 s4 s3 XCHG3
+          s3 s4 XCHG
         }>
-        s2 s4 XCHG
-        3 ROLL
+        s3 s3 s0 XCHG3
         pack_state INLINECALLDICT
         c4 POP
       }>
@@ -607,11 +606,10 @@ PROGRAM{
         8 BLKDROP
         s6 POP
         s7 POP
-        s3 PUSH
-        s3 s5 XCHG
-        s1 s0 s2 PUXC2
-        s7 s9 s10 XCHG3
-        complete_auction CALLDICT
+        s3 s4 XCHG
+        s5 s0 s2 XCPUXC
+        s8 s9 XCHG2
+        ~complete_auction CALLDICT
       }>ELSE<{
         18 s() PUSH
         s2 PUSH
@@ -655,10 +653,10 @@ PROGRAM{
         s0 s6 s6 XCHG3
         32 PUSHINT
         DICTUSETB
-        s2 s3 XCHG2
+        s3 s4 XCHG
+        s1 s3 s0 XCHG3
       }>
-      s0 s4 XCHG
-      s2 s3 XCHG2
+      s3 s3 s0 XCHG3
       pack_state INLINECALLDICT
       c4 POP
     }>
@@ -774,11 +772,10 @@ PROGRAM{
         s3 s7 XCHG
         s1 s2 XCHG
       }>
-      s6 PUSH
-      s0 s4 XCHG
-      s3 s6 XCPU
-      s9 s3 s3 XCHG3
-      complete_auction CALLDICT
+      s4 s6 XCHG
+      s5 PUSH
+      s8 s8 s3 XCHG3
+      ~complete_auction CALLDICT
     }>ELSE<{
       s4 PUSH
       102 EQINT
@@ -799,10 +796,11 @@ PROGRAM{
         HASHSU
         SWAP
         32 LDU
+        8 LDU
         256 LDU
         LDGRAMS
         DROP
-        s2 s7 PUSH2
+        s3 s8 PUSH2
         32 PUSHINT
         DICTUGET
         NULLSWAPIFNOT
@@ -810,21 +808,22 @@ PROGRAM{
         ~load_common_auction_fields CALLDICT
         DROP
         s3 POP
-        s0 s4 XCHG
+        s3 PUSH
+        63 GTINT
+        36 THROWIFNOT
+        NOW
+        s1 s2 XCHG
+        LESS
+        37 THROWIFNOT
+        s0 s3 XCHG
         32 LDU
         LDGRAMS
         NIP
         LDDICT
         DROP
-        s4 PUSH
-        63 GTINT
-        36 THROWIFNOT
         NOW
-        s1 s3 XCHG
+        s1 s2 XCHG
         GREATER
-        37 THROWIFNOT
-        NOW
-        LESS
         38 THROWIFNOT
         s5 s0 PUSH2
         8 PUSHPOW2
@@ -832,6 +831,10 @@ PROGRAM{
         NULLSWAPIFNOT
         39 THROWIFNOT
         8 LDU
+        s1 s8 PUXC
+        EQUAL
+        40 THROWIFNOT
+        s0 s7 XCHG
         LDGRAMS
         9 PUSHPOW2
         LDSLICEX
@@ -839,52 +842,48 @@ PROGRAM{
         s10 s0 s0 XC2PU
         s0 17 s() XCHG
         CHKSIGNU
-        40 THROWIFNOT
+        41 THROWIFNOT
         s10 s13 s11 PUSH3
         s12 s15 PUSH2
         pack_state INLINECALLDICT
         c4 POP
         COMMIT
         ACCEPT
-        s5 s2 PUXC
+        s4 s1 PUXC
         GEQ
-        s5 s8 PUSH2
+        s4 s8 PUSH2
         LEQ
         AND
         IF:<{
           NEWC
-          s1 s2 XCHG
+          s1 s6 XCHG
           8 STU
           s0 s7 XCHG2
           STGRAMS
           s0 s12 XCHG2
           STSLICER
-          ROT
+          SWAP
           STGRAMS
-          s0 s0 s4 XCHG3
+          s0 s2 XCHG
           8 PUSHPOW2
           DICTUSETB
         }>ELSE<{
-          s2 s13 XCHG
-          s3 s7 XCHG
-          s0 s5 XCHG
+          s13 s7 s5 XCHG3
           5 BLKDROP
         }>
-        s8 s8 s0 XCHG3
-        s3 PUSH
+        s8 s0 s3 XC2PU
         FALSE
         check_blind_bids CALLDICT
         DROP
         IF:<{
-          s6 PUSH
-          s0 s4 XCHG
-          s3 s9 XCHG
-          s6 PUSH
-          s10 s3 s3 XCHG3
-          s0 s10 XCHG
-          complete_auction CALLDICT
+          s4 s6 XCHG
+          s3 s8 XCHG
+          s5 PUSH
+          3 -ROLL
+          ~complete_auction CALLDICT
         }>ELSE<{
           s3 s8 XCHG
+          s4 s6 XCHG
           4 BLKDROP
         }>
       }>ELSE<{
@@ -1033,12 +1032,12 @@ PROGRAM{
           }>
           s0 s2 XCHG
         }>
-        s4 s3 XCHG2
+        s3 s4 s3 XCHG3
       }>
       s3 s4 XCHG
     }>
-    s0 s4 XCHG
-    s1 s3 s3 XCHG3
+    s2 s4 XCHG
+    s1 s3 s0 XCHG3
     pack_state INLINECALLDICT
     c4 POP
   }>
