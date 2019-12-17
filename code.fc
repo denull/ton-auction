@@ -1,4 +1,15 @@
 
+() send_money(int wc, int addr, int amount) impure {
+  send_raw_message(begin_cell()
+    .store_uint(0xc4, 9)
+    .store_uint(wc, 8)
+    .store_uint(addr, 256)
+    .store_grams(amount)
+    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+    .store_uint(0, 32) ;; Simple money transfer
+  .end_cell(), 3);
+}
+
 () send_message_back(slice addr, ans_tag, query_id, body, extra, grams, mode) impure {
   ;; int_msg_info$0 ihr_disabled:Bool bounce:Bool bounced:Bool src:MsgAddress -> 011000
   var msg = begin_cell()
@@ -83,15 +94,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
       var received_amount = bid~load_grams();
       ifnot (bidder_addr == winner_addr) {
         reserved_balance = reserved_balance - (received_amount - bidding_fee);
-
-        send_raw_message(begin_cell()
-          .store_uint(0xc4, 9)
-          .store_uint(wc, 8)
-          .store_uint(bidder_addr, 256)
-          .store_grams(received_amount - bidding_fee)
-          .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-          .store_uint(0, 32) ;; Simple money transfer
-        .end_cell(), 3);
+        send_money(wc, bidder_addr, received_amount - bidding_fee);
 
         var bid_signature = bid~load_bits(512);
         ifnot (bid.slice_data_empty?()) {
@@ -104,22 +107,18 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
     }
   } until (~ f);
 
+  if (second_bid == 0) {
+    second_bid = winner_bid;
+  }
+
   if (auction_type == 65) {
     ;; Vickrey auction: winner pays second price instead of his own
     winner_bid = second_bid;
   }
 
   if (winner_received > winner_bid) {
-    reserved_balance = reserved_balance - (winner_received - bidding_fee);
-
-    send_raw_message(begin_cell()
-      .store_uint(0xc4, 9)
-      .store_uint(winner_wc, 8)
-      .store_uint(winner_addr, 256)
-      .store_grams(winner_received - winner_bid)
-      .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-      .store_uint(0, 32) ;; Simple money transfer
-    .end_cell(), 3);
+    reserved_balance = reserved_balance - (winner_received - winner_bid);
+    send_money(winner_wc, winner_addr, winner_received - winner_bid);
   }
 
   return (winner_wc, winner_addr, winner_bid, all_decrypted, reserved_balance);
@@ -200,14 +199,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
         reserved_balance = reserved_balance - (current_price - bidding_fee);
 
         ;; Replace current bidder, return him his bid
-        var current_addr = auction~load_bits(256 + 8);
-        send_raw_message(begin_cell()
-          .store_uint(0xc4, 9)
-          .store_slice(current_addr)
-          .store_grams(current_price - bidding_fee)
-          .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-          .store_uint(0, 32) ;; Simple money transfer
-        .end_cell(), 3);
+        send_money(auction~load_uint(8), auction~load_uint(256), current_price - bidding_fee);
       }
 
       if (is_won) {
@@ -389,19 +381,10 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
       ;; Withdraw money (just like from a regular wallet)
       cs~touch();
       while (~ cs.slice_empty?()) {
-        var addr = cs~load_bits(256 + 8);
-        var amount = cs~load_grams();
-
+        var (wc, addr, amount) = (cs~load_uint(8), cs~load_uint(256), cs~load_grams());
         transfer_balance += amount;
         throw_if(44, reserved_balance >= total_balance - transfer_balance);
-
-        send_raw_message(begin_cell()
-          .store_uint(0xc4, 9)
-          .store_slice(addr)
-          .store_grams(amount)
-          .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-          .store_uint(0, 32) ;; Simple money transfer
-        .end_cell(), 3);
+        send_money(wc, addr, amount);
       }
     } elseif (op == 2) {
       ;; Create new auction
@@ -422,15 +405,8 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
         var minimum_step = auction~load_grams();
         var current_price = auction~load_grams();
         if (current_price > 0) {
-          var current_addr = auction~load_bits(256 + 8);
           reserved_balance = reserved_balance - (current_price - bidding_fee);
-          send_raw_message(begin_cell()
-            .store_uint(0xc4, 9)
-            .store_slice(current_addr)
-            .store_grams(current_price - bidding_fee)
-            .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-            .store_uint(0, 32) ;; Simple money transfer
-          .end_cell(), 3);
+          send_money(auction~load_uint(8), auction~load_uint(256), current_price - bidding_fee);
         }
       } else {
         var bids = auction~load_dict();
@@ -441,15 +417,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
             var wc = bid~load_uint(8);
             var received_amount = bid~load_grams();
             reserved_balance = reserved_balance - (received_amount - bidding_fee);
-
-            send_raw_message(begin_cell()
-              .store_uint(0xc4, 9)
-              .store_uint(wc, 8)
-              .store_uint(bidder_addr, 256)
-              .store_grams(received_amount - bidding_fee)
-              .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-              .store_uint(0, 32) ;; Simple money transfer
-            .end_cell(), 3);
+            send_money(wc, bidder_addr, received_amount - bidding_fee);
           }
         } until (~ f);
       }

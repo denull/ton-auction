@@ -1,5 +1,6 @@
 // automatically generated from `../src/crypto/smartcont/stdlib.fc` `code.fc` 
 PROGRAM{
+  DECLPROC send_money
   DECLPROC send_message_back
   DECLPROC ~load_common_auction_fields
   DECLPROC pack_state
@@ -9,6 +10,25 @@ PROGRAM{
   DECLPROC recv_internal
   DECLPROC recv_external
   85143 DECLMETHOD seqno
+  send_money PROC:<{
+    0 PUSHINT
+    DUP
+    196 PUSHINT
+    NEWC
+    9 STU
+    s1 s5 XCHG
+    8 STU
+    s1 s3 XCHG
+    256 STU
+    SWAP
+    STGRAMS
+    s1 s2 XCHG
+    107 STU
+    32 STU
+    ENDC
+    3 PUSHINT
+    SENDRAWMSG
+  }>
   send_message_back PROC:<{
     0 PUSHINT
     24 PUSHINT
@@ -167,25 +187,10 @@ PROGRAM{
           SUB
           s1 s12 XCHG
           SUB
-          0 PUSHINT
-          DUP
-          196 PUSHINT
-          NEWC
-          9 STU
-          s1 s5 XCHG
-          8 STU
-          s5 s(-1) PUXC
-          256 STU
-          s3 s15 XCPU
+          s1 s13 XCPU
           SUB
-          s1 s3 XCHG
-          STGRAMS
-          s1 s3 XCHG
-          107 STU
-          32 STU
-          ENDC
-          3 PUSHINT
-          SENDRAWMSG
+          s2 s3 s(-1) XCPUXC
+          send_money CALLDICT
           s0 s9 XCHG
           9 PUSHPOW2
           LDSLICEX
@@ -220,46 +225,40 @@ PROGRAM{
     }>
     NIP
     s7 POP
-    s0 s8 XCHG
+    s7 POP
+    s5 PUSH
+    0 EQINT
+    IF:<{
+      s5 POP
+      s4 PUSH
+    }>ELSE<{
+      s0 s5 XCHG
+    }>
+    s0 s7 XCHG
     65 EQINT
     IF:<{
-      DROP
+      s4 POP
     }>ELSE<{
-      s5 POP
+      s4 s6 XCHG
+      s4 POP
     }>
-    s6 s4 PUSH2
+    s4 s5 PUSH2
     GREATER
     IF:<{
-      s6 s5 PUXC
+      s4 s5 PUSH2
       SUB
       s1 s3 XCHG
       SUB
-      0 PUSHINT
-      DUP
-      196 PUSHINT
-      NEWC
-      9 STU
-      s5 s(-1) PUXC
-      8 STU
-      s7 s(-1) PUXC
-      256 STU
-      s8 s6 XCPU
+      s4 s5 XCPU
       SUB
-      s1 s8 XCHG
-      STGRAMS
-      s1 s7 XCHG
-      107 STU
-      s1 s6 XCHG
-      32 STU
-      ENDC
-      3 PUSHINT
-      SENDRAWMSG
+      s2 s3 s(-2) PU2XC
+      send_money CALLDICT
     }>ELSE<{
-      s3 s6 XCHG
-      s3 s5 XCHG2
-      2DROP
+      s0 s1 s4 XCHG3
+      DROP
     }>
-    s0 s4 XCHG2
+    4 1 REVERSE
+    ROT
   }>
   complete_auction PROC:<{
     32 PUSHINT
@@ -480,27 +479,13 @@ PROGRAM{
           s1 s10 XCHG
           SUB
           s0 s8 XCHG
-          264 PUSHINT
-          LDSLICEX
+          8 LDU
+          256 LDU
           DROP
-          0 PUSHINT
-          DUP
-          196 PUSHINT
-          NEWC
-          9 STU
-          s0 s3 XCHG2
-          STSLICER
-          s0 16 s() XCHG
-          s3 PUSH
+          s15 s2 XCPU
           SUB
-          s1 16 s() XCHG
-          STGRAMS
-          107 STU
-          s1 s14 XCHG
-          32 STU
-          ENDC
-          3 PUSHINT
-          SENDRAWMSG
+          s1 s15 s0 XCHG3
+          send_money CALLDICT
         }>ELSE<{
           s14 s9 XCHG2
           s8 POP
@@ -928,31 +913,18 @@ PROGRAM{
             SEMPTY
             NOT
           }>DO<{
-            264 PUSHINT
-            LDSLICEX
+            8 LDU
+            256 LDU
             LDGRAMS
-            s3 s1 XCPU
+            s4 s1 XCPU
             ADD
-            s6 s0 PUSH2
+            s7 s0 PUSH2
             SUB
-            s5 s(-1) PUXC
+            s6 s(-1) PUXC
             GEQ
             44 THROWIF
-            0 PUSHINT
-            DUP
-            196 PUSHINT
-            NEWC
-            9 STU
-            s0 s5 XCHG2
-            STSLICER
-            s0 s3 XCHG2
-            STGRAMS
-            s1 s3 XCHG
-            107 STU
-            32 STU
-            ENDC
-            3 PUSHINT
-            SENDRAWMSG
+            3 -ROLL
+            send_money CALLDICT
             SWAP
           }>
           2DROP
@@ -1001,31 +973,18 @@ PROGRAM{
                 OVER
                 0 GTINT
                 IF:<{
-                  264 PUSHINT
-                  LDSLICEX
-                  DROP
                   s1 s2 PUSH2
                   SUB
                   s1 s6 XCHG
                   SUB
-                  0 PUSHINT
-                  DUP
-                  196 PUSHINT
-                  NEWC
-                  9 STU
-                  s0 s8 XCHG2
-                  STSLICER
-                  s3 s4 XCHG2
+                  s0 s5 XCHG
+                  8 LDU
+                  256 LDU
+                  DROP
+                  s2 s3 XCHG2
                   SUB
-                  s1 s3 XCHG
-                  STGRAMS
-                  s1 s5 XCHG
-                  107 STU
-                  s1 s4 XCHG
-                  32 STU
-                  ENDC
-                  3 PUSHINT
-                  SENDRAWMSG
+                  s1 s2 XCHG
+                  send_money CALLDICT
                 }>ELSE<{
                   3 BLKDROP
                 }>
@@ -1050,26 +1009,10 @@ PROGRAM{
                     SUB
                     s1 s9 XCHG
                     SUB
-                    0 PUSHINT
-                    DUP
-                    196 PUSHINT
-                    NEWC
-                    9 STU
-                    s1 s4 XCHG
-                    8 STU
-                    s4 s(-1) PUXC
-                    256 STU
-                    s10 s7 XCPU
+                    s8 s5 XCPU
                     SUB
-                    s1 s10 XCHG
-                    STGRAMS
-                    s1 s2 XCHG
-                    107 STU
-                    s1 s8 XCHG
-                    32 STU
-                    ENDC
-                    3 PUSHINT
-                    SENDRAWMSG
+                    s2 s(-1) PUXC
+                    send_money CALLDICT
                   }>ELSE<{
                     s2 POP
                   }>
