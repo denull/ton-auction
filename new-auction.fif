@@ -59,7 +59,7 @@ BaseFile +".pk" load-keypair
 =: PublicKey
 
 ."Creating new auction #" AuctionId . ."of type " AuctionType . .", starting at " StartTime . .", ending at " EndTime . cr
-AuctionType 63 > { ."Blind auction's decrypt time is " DecryptTime . .", fixed amount " FixedAmount .GR cr } if
+AuctionType 63 > { ."Blind auction's decrypt deadline is " DecryptTime . .", fixed amount " FixedAmount .GR cr } if
 ."Initial price: " InitialPrice .GR .", buyout price: " BuyoutPrice .GR .", minimum step: " MinimumStep .GR .", bidding fee: " BiddingFee .GR cr
 
 <b

@@ -27,7 +27,7 @@ ContractAddrRaw BounceFlag parse-load-address =: BounceFlag 2=: ContractAddr
 ."Contract address = " ContractAddr 2dup .addr cr 6 .Addr cr
 
 BidFile +".boc" file>B 32 B| B>boc =: BidBody =: PrivateKey
-PrivateKey ~ priv>pub =: PublicKey
+PrivateKey priv>pub =: PublicKey
 
 ."Creating a decrypt request to an auction" cr
 
