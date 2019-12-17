@@ -57,7 +57,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
   var winner_wc = 0;
   var winner_addr = 0;
   var winner_bid = 0;
-  var winner_received = 0;
+  var winner_sent = 0;
   var all_decrypted = true;
   var bidder_addr = -1;
   do {
@@ -73,7 +73,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
           winner_wc = wc;
           winner_addr = bidder_addr;
           winner_bid = actual_amount;
-          winner_received = received_amount;
+          winner_sent = received_amount;
         }
       } else {
         all_decrypted = false;
@@ -116,9 +116,9 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
     winner_bid = second_bid;
   }
 
-  if (winner_received > winner_bid) {
-    reserved_balance = reserved_balance - (winner_received - winner_bid);
-    send_money(winner_wc, winner_addr, winner_received - winner_bid);
+  if (winner_sent > winner_bid) {
+    reserved_balance = reserved_balance - (winner_sent - winner_bid);
+    send_money(winner_wc, winner_addr, winner_sent - winner_bid);
   }
 
   return (winner_wc, winner_addr, winner_bid, all_decrypted, reserved_balance);
@@ -196,9 +196,8 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
       }
 
       ifnot (current_price == 0) {
-        reserved_balance = reserved_balance - (current_price - bidding_fee);
-
         ;; Replace current bidder, return him his bid
+        reserved_balance = reserved_balance - (current_price - bidding_fee);
         send_money(auction~load_uint(8), auction~load_uint(256), current_price - bidding_fee);
       }
 
@@ -207,7 +206,6 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
         complete_auction(auctions, auction_id, notification_addr, src_wc, src_addr, msg_value);
       } else {
         reserved_balance = reserved_balance + (msg_value - bidding_fee);
-
         auctions~udict_set_builder(32, auction_id, begin_cell()
           .store_uint(auction_type, 8)
           .store_uint(start_time, 32)
