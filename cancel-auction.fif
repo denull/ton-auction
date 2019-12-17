@@ -34,7 +34,7 @@ BaseFile +".pk" load-keypair
 <b
   SeqNo 32 u,   // seqno
   -1 32 i,      // valid_until
-  2 32 u,       // action, 2 = cancel auction
+  3 32 u,       // action, 3 = cancel auction
   AuctionId 32 u,
 b> =: MessageBody
 
