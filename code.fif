@@ -5,7 +5,7 @@ PROGRAM{
   DECLPROC pack_state
   DECLPROC unpack_state
   DECLPROC check_blind_bids
-  DECLPROC send_auction_notification
+  DECLPROC complete_auction
   DECLPROC recv_internal
   DECLPROC recv_external
   85143 DECLMETHOD seqno
@@ -261,7 +261,13 @@ PROGRAM{
     }>
     s0 s4 XCHG2
   }>
-  send_auction_notification PROC:<{
+  complete_auction PROC:<{
+    32 PUSHINT
+    s5 s6 s6 PUXC2
+    DICTUDELGET
+    NULLSWAPIFNOT
+    DROP
+    NIP
     NEWC
     SWAP
     STSLICER
@@ -271,20 +277,20 @@ PROGRAM{
     196 PUSHINT
     NEWC
     9 STU
-    s0 s8 XCHG2
+    s0 s6 XCHG2
     STSLICER
     30 PUSHPOW2
     STGRAMS
-    s1 s7 XCHG
+    s1 s5 XCHG
     107 STU
-    s1 s6 XCHG
+    s1 s4 XCHG
     32 STU
     s1 s4 XCHG
     64 STU
-    s1 s2 XCHG
     8 STU
+    s1 s2 XCHG
     256 STU
-    SWAP
+    ROT
     STGRAMS
     STREF
     ENDC
@@ -506,16 +512,11 @@ PROGRAM{
           s2 POP
           s6 POP
           s7 POP
-          32 PUSHINT
-          s7 s4 s4 PUXC2
-          DICTUDELGET
-          NULLSWAPIFNOT
-          DROP
-          s4 PUSH
-          s4 s8 XCHG
+          s3 PUSH
           s3 s7 XCHG
-          s9 s10 s10 XCHG3
-          send_auction_notification CALLDICT
+          s1 s0 s2 PUXC2
+          s7 s9 s10 XCHG3
+          complete_auction CALLDICT
         }>ELSE<{
           s15 s11 PUSH2
           SUB
@@ -544,9 +545,10 @@ PROGRAM{
           s0 s4 s4 XCHG3
           32 PUSHINT
           DICTUSETB
-          s3 s1 s3 XCHG3
+          s3 s4 s3 XCHG3
         }>
-        s4 s0 s3 XCHG3
+        s2 s4 XCHG
+        3 ROLL
         pack_state INLINECALLDICT
         c4 POP
       }>
@@ -620,15 +622,11 @@ PROGRAM{
         8 BLKDROP
         s6 POP
         s7 POP
-        32 PUSHINT
-        s5 s4 s4 PUXC2
-        DICTUDELGET
-        NULLSWAPIFNOT
-        DROP
-        s4 PUSH
-        5 3 REVERSE
-        s9 s10 s10 XCHG3
-        send_auction_notification CALLDICT
+        s3 PUSH
+        s3 s5 XCHG
+        s1 s0 s2 PUXC2
+        s7 s9 s10 XCHG3
+        complete_auction CALLDICT
       }>ELSE<{
         18 s() PUSH
         s2 PUSH
@@ -672,10 +670,10 @@ PROGRAM{
         s0 s6 s6 XCHG3
         32 PUSHINT
         DICTUSETB
-        s1 s4 s3 XCHG3
+        s2 s3 XCHG2
       }>
-      s4 s3 s4 XCHG3
-      SWAP
+      s0 s4 XCHG
+      s2 s3 XCHG2
       pack_state INLINECALLDICT
       c4 POP
     }>
@@ -791,18 +789,11 @@ PROGRAM{
         s3 s7 XCHG
         s1 s2 XCHG
       }>
-      32 PUSHINT
-      s4 s7 s7 PUXC2
-      DICTUDELGET
-      NULLSWAPIFNOT
-      DROP
       s6 PUSH
-      s0 s5 XCHG
       s0 s4 XCHG
-      s3 s9 XCHG
-      s2 s9 XCHG
-      SWAP
-      send_auction_notification CALLDICT
+      s3 s6 XCPU
+      s9 s3 s3 XCHG3
+      complete_auction CALLDICT
     }>ELSE<{
       s4 PUSH
       102 EQINT
@@ -900,20 +891,15 @@ PROGRAM{
         check_blind_bids CALLDICT
         DROP
         IF:<{
-          32 PUSHINT
-          s9 s7 s7 PUXC2
-          DICTUDELGET
-          NULLSWAPIFNOT
-          DROP
           s6 PUSH
-          s0 s5 XCHG
-          s4 s10 XCHG
-          s3 s10 XCHG
-          s10 s8 s8 XCHG3
-          send_auction_notification CALLDICT
+          s0 s4 XCHG
+          s3 s9 XCHG
+          s6 PUSH
+          s10 s3 s3 XCHG3
+          s0 s10 XCHG
+          complete_auction CALLDICT
         }>ELSE<{
-          s6 s8 XCHG
-          s3 s6 XCHG
+          s3 s8 XCHG
           4 BLKDROP
         }>
       }>ELSE<{
@@ -1104,12 +1090,12 @@ PROGRAM{
           }>
           s0 s2 XCHG
         }>
-        s1 s4 s3 XCHG3
+        s4 s3 XCHG2
       }>
       s3 s4 XCHG
     }>
     s0 s4 XCHG
-    s2 s3 XCHG2
+    s1 s3 s3 XCHG3
     pack_state INLINECALLDICT
     c4 POP
   }>
