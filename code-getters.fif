@@ -346,7 +346,7 @@ PROGRAM{
         s3 POP
         s3 POP
         4294967294 PUSHINT
-        1 PUSHINT
+        36 PUSHINT
         0 PUSHINT
         s3 s5 XCHG
         s2 s4 XCHG
@@ -366,7 +366,7 @@ PROGRAM{
         s3 POP
         s3 POP
         4294967294 PUSHINT
-        2 PUSHINT
+        46 PUSHINT
         0 PUSHINT
         s3 s5 XCHG
         s2 s4 XCHG
@@ -385,7 +385,7 @@ PROGRAM{
         s3 POP
         s3 POP
         4294967294 PUSHINT
-        3 PUSHINT
+        47 PUSHINT
         0 PUSHINT
         s3 s5 XCHG
         s2 s4 XCHG
@@ -404,7 +404,7 @@ PROGRAM{
         s3 POP
         s3 POP
         4294967294 PUSHINT
-        4 PUSHINT
+        48 PUSHINT
         0 PUSHINT
         s3 s5 XCHG
         s2 s4 XCHG
@@ -440,7 +440,7 @@ PROGRAM{
           s3 POP
           s3 POP
           4294967294 PUSHINT
-          5 PUSHINT
+          49 PUSHINT
           0 PUSHINT
           s3 s5 XCHG
           s2 s4 XCHG
@@ -466,7 +466,7 @@ PROGRAM{
           s3 POP
           s3 POP
           4294967294 PUSHINT
-          6 PUSHINT
+          50 PUSHINT
           0 PUSHINT
           s3 s5 XCHG
           s2 s4 XCHG
@@ -590,7 +590,7 @@ PROGRAM{
         s3 POP
         s3 POP
         4294967294 PUSHINT
-        7 PUSHINT
+        51 PUSHINT
         0 PUSHINT
         s3 s5 XCHG
         s2 s4 XCHG
@@ -630,7 +630,7 @@ PROGRAM{
         s3 POP
         s3 POP
         4294967294 PUSHINT
-        8 PUSHINT
+        52 PUSHINT
         0 PUSHINT
         s3 s5 XCHG
         s2 s4 XCHG
@@ -791,13 +791,13 @@ PROGRAM{
       32 PUSHINT
       DICTUGET
       NULLSWAPIFNOT
-      35 THROWIFNOT
+      36 THROWIFNOT
       ~load_common_auction_fields CALLDICT
       3 BLKDROP
       s2 POP
       NOW
-      GREATER
-      46 THROWIF
+      LESS
+      38 THROWIFNOT
       0 PUSHINT
       s0 s2 PUSH2
       64 LESSINT
@@ -835,7 +835,7 @@ PROGRAM{
         NOW
         s1 s2 XCHG
         GREATER
-        47 THROWIF
+        45 THROWIF
         ACCEPT
         LDGRAMS
         NIP
@@ -864,7 +864,7 @@ PROGRAM{
         HASHSU
         s0 s8 s8 XC2PU
         CHKSIGNU
-        34 THROWIFNOT
+        35 THROWIFNOT
         s0 s5 XCHG
         LDREF
         DROP
@@ -881,17 +881,17 @@ PROGRAM{
         32 PUSHINT
         DICTUGET
         NULLSWAPIFNOT
-        35 THROWIFNOT
+        36 THROWIFNOT
         ~load_common_auction_fields CALLDICT
         2DROP
         s3 POP
         s3 PUSH
         63 GTINT
-        36 THROWIFNOT
+        37 THROWIFNOT
         NOW
         s1 s2 XCHG
         LESS
-        37 THROWIFNOT
+        38 THROWIFNOT
         s0 s3 XCHG
         32 LDU
         LDGRAMS
@@ -901,16 +901,16 @@ PROGRAM{
         NOW
         s1 s2 XCHG
         GREATER
-        38 THROWIFNOT
+        39 THROWIFNOT
         s5 s0 PUSH2
         8 PUSHPOW2
         DICTUGET
         NULLSWAPIFNOT
-        39 THROWIFNOT
+        40 THROWIFNOT
         8 LDU
         s1 s8 PUXC
         EQUAL
-        40 THROWIFNOT
+        41 THROWIFNOT
         s0 s7 XCHG
         LDGRAMS
         9 PUSHPOW2
@@ -919,7 +919,7 @@ PROGRAM{
         s10 s0 s0 XC2PU
         s0 17 s() XCHG
         CHKSIGNU
-        41 THROWIFNOT
+        42 THROWIFNOT
         s10 s13 s11 PUSH3
         s12 s15 PUSH2
         pack_state INLINECALLDICT
@@ -968,7 +968,7 @@ PROGRAM{
         HASHSU
         s0 s8 s2 XC2PU
         CHKSIGNU
-        43 THROWIFNOT
+        34 THROWIFNOT
         s5 s0 s6 PUSH3
         s4 s7 PUSH2
         pack_state INLINECALLDICT
@@ -998,7 +998,7 @@ PROGRAM{
             SUB
             s6 s(-1) PUXC
             GEQ
-            44 THROWIF
+            43 THROWIF
             3 -ROLL
             send_money CALLDICT
             SWAP
@@ -1019,7 +1019,7 @@ PROGRAM{
             DICTUGET
             NULLSWAPIFNOT
             NIP
-            45 THROWIF
+            44 THROWIF
             CTOS
             s0 s1 s4 XCHG3
             32 PUSHINT
@@ -1035,7 +1035,7 @@ PROGRAM{
               32 PUSHINT
               DICTUGET
               NULLSWAPIFNOT
-              35 THROWIFNOT
+              36 THROWIFNOT
               ~load_common_auction_fields CALLDICT
               s3 s5 XCHG
               5 BLKDROP
