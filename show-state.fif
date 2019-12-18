@@ -39,6 +39,7 @@ Auctions 32 {
   Gram@+ swap ."    │  bidding_fee:    " .GR cr
   Gram@+ swap ."    │  initial_price:  " .GR cr
   Gram@+ swap ."    │  buyout_price:   " .GR cr
+  32 u@+ swap ."    │  stock_size:     " . cr
   swap 64 < {
     Gram@+ swap ."    │  minimum_step:   " .GR cr
                 ."    │" cr

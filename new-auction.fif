@@ -1,7 +1,7 @@
 #!/usr/bin/env fift -s
 "auction-utils.fif" include
 
-{ ."<contract> <seqno> <auction-id> <auction-type> <end-time> [<decrypt-time> <fixed-amount>] [-s <minimum-step>] [-t <start-time>] [-f <bidding-fee>] [-i <initial-price>] [-b <buyout-price>] [-O <output-boc>]" cr
+{ ."<contract> <seqno> <auction-id> <auction-type> <end-time> [<decrypt-time> <fixed-amount>] [-s <minimum-step>] [-t <start-time>] [-f <bidding-fee>] [-i <initial-price>] [-b <buyout-price>] [-n <stock-size>] [-O <output-boc>]" cr
   ."Starts a new auction via a smart contract created by init.fif, with address loaded from file <contract>.addr "
   ."and private key from <contract>.pk, and saves it into <output-boc>.boc ('<contract>-query.boc' by default)." cr
   ."<seqno> is the current seqno value of the contract," cr
@@ -17,13 +17,15 @@
   ."-t <start-time> is Unixtime of the auction start (if not specified, auction starts immediately after publishing)," cr
   ."-f <bidding-fee> is the amount in Grams that won't be returned to bidders (if not specified, all losing bids are returned completely)," cr
   ."-i <initial-price> is the minimum amount in Grams that the first bid should be equal to," cr
-  ."-b <buyout-price> is the amount in Grams that allows to instantly win the auction."
+  ."-b <buyout-price> is the amount in Grams that allows to instantly win the auction," cr
+  ."-n <stock-size> is the number of times this auction should be automatically repeated." cr
 } : usage()
 
 // == Parsing command-line arguments
 
 {
   "-O" "--output-file" 1 { =: SaveFile } option-long()
+  "-n" "--stock-size" 1 { parse-int =: StockSize } option-long()
   "-s" "--minimum-step" 1 { $>GR =: MinimumStep } option-long()
   "-t" "--start-time" 1 { parse-int =: StartTime } option-long()
   "-f" "--bidding-fee" 1 { $>GR =: BiddingFee } option-long()
@@ -50,6 +52,7 @@ BaseFile +"-query" =:? SaveFile
 0 =:? BuyoutPrice
 0 =:? DecryptTime
 0 =:? FixedAmount
+0 =:? StockSize
 BaseFile +".addr" load-address
 2dup 2constant ContractAddr
 ."Contract address = " 2dup .addr cr 6 .Addr cr
@@ -58,7 +61,7 @@ BaseFile +".pk" load-keypair
 =: PrivateKey
 =: PublicKey
 
-."Creating new auction #" AuctionId . ."of type " AuctionType . .", starting at " StartTime . .", ending at " EndTime . cr
+."Creating new auction #" AuctionId . ."of type " AuctionType . .", starting at " StartTime . .", ending at " EndTime . .", stock size: " StockSize . cr
 AuctionType 63 > { ."Blind auction's decrypt deadline is " DecryptTime . .", fixed amount " FixedAmount .GR cr } if
 ."Initial price: " InitialPrice .GR .", buyout price: " BuyoutPrice .GR .", minimum step: " MinimumStep .GR .", bidding fee: " BiddingFee .GR cr
 
@@ -69,6 +72,7 @@ AuctionType 63 > { ."Blind auction's decrypt deadline is " DecryptTime . .", fix
   BiddingFee Gram,
   InitialPrice Gram,
   BuyoutPrice Gram,
+  StockSize 32 u,
   AuctionType 64 < {
     MinimumStep Gram,
     0 Gram, // Current price
