@@ -3,8 +3,7 @@
 
 { ."<contract> <dest-addr> <seqno> <amount> [-O <output-boc>]" cr
   ."Creates a money withdrawal request to an auction contract, with address loaded from file <contract>.addr "
-  ."and private keys from <contract>.pk, and saves it into <output-boc>.boc ('<contract>-query.boc' by default)." cr
-  ."Switch -b disables bounce flag (enabled by default), and option -M allows to set send mode for future message."
+  ."and private keys from <contract>.pk, and saves it into <output-boc>.boc ('<contract>-query.boc' by default)."
 } : usage()
 
 // == Parsing command-line arguments

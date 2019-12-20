@@ -1025,9 +1025,10 @@ PROGRAM{
             32 PUSHINT
             DICTUSET
           }>ELSE<{
-            s0 s2 XCHG
+            s2 PUSH
             3 EQINT
             IF:<{
+              s2 POP
               s0 s2 XCHG
               32 LDU
               DROP
@@ -1103,8 +1104,26 @@ PROGRAM{
               NULLSWAPIFNOT
               2DROP
             }>ELSE<{
-              2SWAP
-              DROP
+              s0 s2 XCHG
+              4 EQINT
+              IF:<{
+                s0 s2 XCHG
+                LDREF
+                OVER
+                SETCODE
+                SEMPTY
+                IFNOT:<{
+                  CTOS
+                  BLESS
+                  c3 POP
+                }>ELSE<{
+                  DROP
+                }>
+                0 THROW
+              }>ELSE<{
+                s2 POP
+              }>
+              s0 s2 XCHG
             }>
           }>
           s0 s2 XCHG

@@ -22,7 +22,7 @@ This directory contains following files:
    Compiled version of `code.fc`. Below you'll find instructions how to recompile it yourself.
 * `code-getters.fif`
    Compiled version of `code.fc` + `getters.fc`.
-* `init.fif`, `new-auction.fif`, `cancel-auction.fif`, `place-bid.fif`, `decrypt-bid.fif`, `ping-auction.fif`, `withdraw.fif` and `show-state.fif`
+* `init.fif`, `new-auction.fif`, `cancel-auction.fif`, `place-bid.fif`, `decrypt-bid.fif`, `ping-auction.fif`, `withdraw.fif`, `upgrade-code.fif` and `show-state.fif`
    Fift scripts for creating new contract, creating new auctions, placing bids and so on. Below you'll find detailed explanations about all of them.
 * `test-init.fif`
    Fift script that simulates the initialisation of a contract locally, without actually uploading it to blockchain.
@@ -63,7 +63,7 @@ Owner of the auction contract can withdraw funds at any time on condition that t
 ## Initialising a new contract
 `./init.fif <workchain-id> <notification-addr> [<filename-base>] [-C <code-fif>]`
 
-This script is used to generate an initalisation message for your contract. It will provide you with a non-bounceable address to send some initial funds to, and after that you can upload to contract's code (using `sendfile` in your TON client).
+This script is used to generate an initialisation message for your contract. It will provide you with a non-bounceable address to send some initial funds to, and after that you can upload to contract's code (using `sendfile` in your TON client).
 
 Note that you're required to specify a "*notification address*" here. After completion of each auction, an internal message with an op = `0x27fca6b9` is generated, containing the following body:
 * *op* (32 bits) = `0x27fca6b9`.
@@ -136,7 +136,12 @@ After the auction's deadline (defined by *end-time*), anyone can trigger the act
 
 At any moment, the owner of the contract can withdraw any amount of Grams stored in it, if the remaining balance of enough to pay back all current bids.
 
-## Inspecting cotract's state
+## Upgrading contract's code
+`./upgrade-code.fif <contract> <seqno> [-C <code-fif>] [-O <output-boc>]`
+
+Use this request to update your contract's code. By default it uses code from `code-getters.fif`, but you can pass any file via `-C` option.
+
+## Inspecting contract's state
 `./show-state.fif <data-boc>`
 
 This script will help to examine the current state of the contract. First, you need to download its state using the `saveaccountdata <filename> <addr>` command in the shell of your client. After that you can pass the generated boc-file to this script.

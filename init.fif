@@ -4,7 +4,7 @@
 { ."<workchain-id> <notification-addr> [<filename-base>] [-C <code-fif>]" cr
   ."Creates a new auction contract, with private key saved to or loaded from <filename-base>.pk" cr
   ."('auction.pk' by default). Information about auction results will be sent to <notification-addr>." cr
-  ."By default uses the full code of the contract. If you want to use stripped-down version (without get-methods), pass 'auction-code' as last argument."
+  ."By default uses the full code of the contract. If you want to use stripped-down version (without get-methods), pass 'code' as last argument."
 } : usage()
 
 // == Parsing command-line arguments

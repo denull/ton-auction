@@ -451,6 +451,14 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
         } until (~ f);
       }
       auctions~udict_delete_get?(32, auction_id);
+    } elseif (op == 4) {
+      ;; Upgrade contract's code
+      var code = cs~load_ref();
+      set_code(code);
+      ifnot(cs.slice_empty?()) {
+        set_c3(code.begin_parse().bless());
+      }
+      throw(0);
     }
   }
   set_data(pack_state(stored_seqno, owner_pubkey, notification_addr, reserved_balance, auctions));
