@@ -1325,7 +1325,7 @@ PROGRAM{
       DUP
       IF:<{
         s0 s2 XCHG
-        32 LDU
+        8 LDU
         LDGRAMS
         0 PUSHINT
         SWAP

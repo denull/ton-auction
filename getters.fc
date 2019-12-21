@@ -104,7 +104,7 @@ _ bidders(int auction_id) method_id {
       (bidder_addr, var bid, var f) = bids.udict_get_prev?(256, bidder_addr);
       if (f) {
         var (bidder_wc, received_amount) = (
-          bid~load_uint(32),
+          bid~load_uint(8),
           bid~load_grams()
         );
         var actual_amount = 0;
