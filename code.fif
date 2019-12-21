@@ -1,4 +1,4 @@
-// automatically generated from `../src/crypto/smartcont/stdlib.fc` `code.fc` 
+// automatically generated from `../../src/crypto/smartcont/stdlib.fc` `../code.fc` 
 PROGRAM{
   DECLPROC send_money
   DECLPROC send_message_back

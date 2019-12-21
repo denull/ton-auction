@@ -1,4 +1,4 @@
-// automatically generated from `../src/crypto/smartcont/stdlib.fc` `code.fc` `getters.fc` 
+// automatically generated from `../../src/crypto/smartcont/stdlib.fc` `../code.fc` `../getters.fc` 
 PROGRAM{
   DECLPROC send_money
   DECLPROC send_message_back
@@ -1215,8 +1215,15 @@ PROGRAM{
           DROP
           ROT
         }>
-        -ROT
-        9 TUPLE
+        s9 PUSH
+        s0 s9 XCHG
+        s0 s8 XCHG
+        s0 s7 XCHG
+        s0 s6 XCHG
+        s0 s5 XCHG
+        s0 s4 XCHG
+        s1 s3 s3 XCHG3
+        10 TUPLE
         s0 s3 XCHG2
         CONS
       }>ELSE<{
