@@ -365,3 +365,11 @@
     ref@+ swap
   s>
 } : parse-external-message()
+
+// read-long-string()
+// cell -- string
+// 
+// Extract a string previously stored via append-long-string() (in TonUtil.fif)
+recursive read-long-string() {
+  <s dup sbits 8 / $@+ ref@? { read-long-string() $+ } if
+} swap !

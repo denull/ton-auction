@@ -79,7 +79,7 @@ This message does not require any response (so it does not contain a *query_id* 
 Notification message is not sent when the auction is cancelled.
 
 ## Starting a new auction
-`./new-auction.fif <contract> <seqno> <auction-id> <auction-type> <end-time> [<decrypt-time> <fixed-amount>] [-s <minimum-step>] [-t <start-time>] [-f <bidding-fee>] [-i <initial-price>] [-b <buyout-price>] [-n <stock-size>] [-O <output-boc>]`
+`./new-auction.fif <contract> <seqno> <auction-id> <auction-type> <end-time> [<decrypt-time> <fixed-amount>] [-c <comment>] [-s <minimum-step>] [-t <start-time>] [-f <bidding-fee>] [-i <initial-price>] [-b <buyout-price>] [-n <stock-size>] [-O <output-boc>]`
 
 As this contract allows multiple concurrent auctions (or trades), the owner of it needs to create them first with this script.
 
@@ -93,6 +93,7 @@ List of options:
 * * `0`, English (open) auction;
 * * `64`, Blind (sealed-bid first-price) auction;
 * * `65`, Vickrey (sealed-bid second-price) auction.
+* *comment* Arbitrary text describing what exactly is being sold here.
 * *start-time* Unixtime, the time when this auction starts.
 * *end-time* Unixtime, the time when this auction ends.
 * *decrypt-time* Unixtime, the time before which all bidders in a sealed-bid auction must present their actual bids.

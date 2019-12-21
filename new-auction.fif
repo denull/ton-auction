@@ -1,7 +1,7 @@
 #!/usr/bin/env fift -s
 "auction-utils.fif" include
 
-{ ."<contract> <seqno> <auction-id> <auction-type> <end-time> [<decrypt-time> <fixed-amount>] [-s <minimum-step>] [-t <start-time>] [-f <bidding-fee>] [-i <initial-price>] [-b <buyout-price>] [-n <stock-size>] [-O <output-boc>]" cr
+{ ."<contract> <seqno> <auction-id> <auction-type> <end-time> [<decrypt-time> <fixed-amount>] [-c <comment>] [-s <minimum-step>] [-t <start-time>] [-f <bidding-fee>] [-i <initial-price>] [-b <buyout-price>] [-n <stock-size>] [-O <output-boc>]" cr
   ."Starts a new auction via a smart contract created by init.fif, with address loaded from file <contract>.addr "
   ."and private key from <contract>.pk, and saves it into <output-boc>.boc ('<contract>-query.boc' by default)." cr
   ."<seqno> is the current seqno value of the contract," cr
@@ -13,6 +13,7 @@
   ."<end-time> is Unixtime of the forced auction end," cr
   ."<decrypt-time> (only for blind auctions, i.e. when <auction-type>=64..65) is Unixtime (after <end-time>), until which bidders need to present their actual bids to the contract," cr
   ."<fixed-amount> (only for blind auctions) is the amount in Grams that must be payed by each bidder (it will be greater or equal to their actual bids)," cr
+  ."-c <comment> is an arbitrary comment describing this auction," cr
   ."-s <minimum-step> (only for open auctions, i.e. when <auction-type>=0) is the minimal bid difference required to outbid previous bidder," cr
   ."-t <start-time> is Unixtime of the auction start (if not specified, auction starts immediately after publishing)," cr
   ."-f <bidding-fee> is the amount in Grams that won't be returned to bidders (if not specified, all losing bids are returned completely)," cr
@@ -25,6 +26,7 @@
 
 {
   "-O" "--output-file" 1 { =: SaveFile } option-long()
+  "-c" "--comment" 1 { =: Comment } option-long()
   "-n" "--stock-size" 1 { parse-int =: StockSize } option-long()
   "-s" "--minimum-step" 1 { $>GR =: MinimumStep } option-long()
   "-t" "--start-time" 1 { parse-int =: StartTime } option-long()
@@ -45,6 +47,7 @@
 // == End of parsing command-line arguments
 
 BaseFile +"-query" =:? SaveFile
+"" =:? Comment
 0 =:? MinimumStep
 0 =:? StartTime
 0 =:? BiddingFee
@@ -57,6 +60,12 @@ BaseFile +".addr" load-address
 2dup 2constant ContractAddr
 ."Contract address = " 2dup .addr cr 6 .Addr cr
 
+Comment $len 0 > {
+  <b Comment 127 append-long-string b>
+} {
+  null
+} cond =: CommentCell
+
 BaseFile +".pk" load-keypair
 =: PrivateKey
 =: PublicKey
@@ -67,6 +76,7 @@ AuctionType 63 > { ."Blind auction's decrypt deadline is " DecryptTime . .", fix
 
 <b
   AuctionType 8 u,
+  CommentCell dict,
   StartTime 32 u,
   EndTime 32 u,
   BiddingFee Gram,

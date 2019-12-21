@@ -44,8 +44,8 @@ _ auctions() method_id {
   do {
     (id, var auction, f) = auctions.udict_get_prev?(32, id);
     if (f) {
-      var (auction_type, start_time, end_time, bidding_fee, initial_price, buyout_price) = (
-        auction~load_uint(8),
+      var (auction_type, comment, start_time, end_time, bidding_fee, initial_price, buyout_price) = (
+        auction~load_uint(8), auction~load_dict(),
         auction~load_uint(32), auction~load_uint(32), 
         auction~load_grams(), auction~load_grams(), auction~load_grams()
       );
@@ -77,8 +77,8 @@ _ bidders(int auction_id) method_id {
   var (auction, auction_found) = auctions.udict_get?(32, auction_id);
   throw_unless(36, auction_found);
 
-  var (auction_type, start_time, end_time, bidding_fee, initial_price, buyout_price) = (
-    auction~load_uint(8),
+  var (auction_type, comment, start_time, end_time, bidding_fee, initial_price, buyout_price) = (
+    auction~load_uint(8), auction~load_dict(),
     auction~load_uint(32), auction~load_uint(32), 
     auction~load_grams(), auction~load_grams(), auction~load_grams()
   );

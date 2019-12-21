@@ -34,6 +34,12 @@ ContractData parse-data()
 Auctions 32 {
   ."    #" over ._ .":" cr
   8 u@+ over  ."    ┌  auction_type:   " . cr
+  dict@+ swap ."    │  comment:        "
+    dup null? {
+      drop ."(empty)" cr
+    } {
+      read-long-string() type cr
+    } cond
   32 u@+ swap ."    │  start_time:     " . cr
   32 u@+ swap ."    │  end_time:       " . cr
   Gram@+ swap ."    │  bidding_fee:    " .GR cr

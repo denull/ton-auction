@@ -64,13 +64,14 @@ PROGRAM{
   }>
   ~load_common_auction_fields PROC:<{
     8 LDU
+    LDDICT
     32 LDU
     32 LDU
     LDGRAMS
     LDGRAMS
     LDGRAMS
     32 LDU
-    7 -ROLL
+    8 -ROLL
   }>
   pack_state PROCREF:<{
     NEWC
@@ -353,10 +354,10 @@ PROGRAM{
       NOW
       LESS
       IFNOTJMP:<{
-        s10 s12 XCHG
+        s11 s12 XCHG
         12 BLKDROP
-        s0 s3 XCHG
-        3 BLKDROP
+        s0 s4 XCHG
+        4 BLKDROP
         s2 POP
         s3 POP
         s3 POP
@@ -372,10 +373,10 @@ PROGRAM{
       NOW
       GREATER
       IFNOTJMP:<{
-        s10 s12 XCHG
+        s11 s12 XCHG
         12 BLKDROP
-        s0 s3 XCHG
-        3 BLKDROP
+        s0 s4 XCHG
+        4 BLKDROP
         s2 POP
         s3 POP
         s3 POP
@@ -387,14 +388,14 @@ PROGRAM{
         64 PUSHINT
         send_message_back CALLDICT
       }>
-      20 s() PUSH
+      21 s() PUSH
       s4 PUSH
       GEQ
       IFNOTJMP:<{
-        s10 s12 XCHG
+        s11 s12 XCHG
         12 BLKDROP
-        s0 s3 XCHG
-        3 BLKDROP
+        s0 s4 XCHG
+        4 BLKDROP
         s2 POP
         s3 POP
         s3 POP
@@ -407,30 +408,30 @@ PROGRAM{
         send_message_back CALLDICT
       }>
       FALSE
-      s7 PUSH
+      s8 PUSH
       64 LESSINT
       IFJMP:<{
-        s9 POP
+        s10 POP
         OVER
         0 GTINT
-        21 s() PUSH
+        22 s() PUSH
         s3 PUSH
         GEQ
         AND
         IF:<{
-          s8 POP
+          s9 POP
           TRUE
         }>ELSE<{
-          s0 s8 XCHG
+          s0 s9 XCHG
         }>
-        20 s() PUSH
+        21 s() PUSH
         s3 PUSH
         GEQ
         IFNOTJMP:<{
-          s10 s12 XCHG
+          s11 s12 XCHG
           12 BLKDROP
-          s0 s3 XCHG
-          3 BLKDROP
+          s0 s4 XCHG
+          4 BLKDROP
           s2 POP
           s3 POP
           s3 POP
@@ -442,21 +443,21 @@ PROGRAM{
           64 PUSHINT
           send_message_back CALLDICT
         }>
-        s0 s7 XCHG
+        s0 s8 XCHG
         LDGRAMS
         LDGRAMS
         OVER
         0 NEQINT
         s2 s3 PUSH2
         ADD
-        24 s() PUSH
+        25 s() PUSH
         SWAP
         LESS
         AND
         IFJMP:<{
           12 BLKDROP
-          s0 s5 XCHG
-          5 BLKDROP
+          s1 s6 XCHG
+          6 BLKDROP
           s2 POP
           s3 POP
           s3 POP
@@ -468,53 +469,56 @@ PROGRAM{
           64 PUSHINT
           send_message_back CALLDICT
         }>
-        s12 POP
-        17 s() POP
+        s13 POP
         18 s() POP
-        s15 PUSH
+        19 s() POP
+        16 s() PUSH
         0 EQINT
         IFNOT:<{
-          s15 s2 PUSH2
+          16 s() PUSH
+          s3 PUSH
           SUB
-          s1 s11 XCHG
+          s1 s12 XCHG
           SUB
-          s0 s9 XCHG
+          s0 s10 XCHG
           8 LDU
           256 LDU
           DROP
-          s0 16 s() XCHG
+          s0 17 s() XCHG
           s3 PUSH
           SUB
           s1 s2 XCHG
-          s1 16 s() XCHG
+          s1 17 s() XCHG
           send_money CALLDICT
         }>ELSE<{
-          s15 s10 XCHG2
-          s9 POP
+          s1 16 s() XCHG
+          s0 s11 XCHG
+          s10 POP
           DROP
         }>
-        s4 PUSH
+        s5 PUSH
         IF:<{
-          s12 s6 s9 XCPU2
-          16 s() PUSH
-          19 s() PUSH
-          21 s() PUSH
+          s13 s7 s10 XCPU2
+          17 s() PUSH
+          20 s() PUSH
+          22 s() PUSH
           ~complete_auction CALLDICT
         }>ELSE<{
-          s0 s12 XCHG
+          s0 s13 XCHG
         }>
-        s5 PUSH
+        s6 PUSH
         0 GTINT
-        s5 s(-1) PUXC
+        s6 s(-1) PUXC
         AND
-        s5 PUSH
+        s6 PUSH
         NOT
         OR
         IF:<{
           NEWC
-          s1 s4 XCHG
+          s1 s5 XCHG
           8 STU
-          s1 s2 XCHG
+          s1 s3 XCHG
+          STDICT
           32 STU
           32 STU
           s10 PUSH
@@ -559,28 +563,29 @@ PROGRAM{
           32 PUSHINT
           DICTUSETB
         }>ELSE<{
-          s10 17 s() XCHG
-          s7 16 s() XCHG
-          s11 s15 XCHG
-          s9 s14 XCHG
-          s13 POP
+          s11 18 s() XCHG
+          s8 17 s() XCHG
+          s12 16 s() XCHG
+          s10 s15 XCHG
+          s14 POP
           12 BLKDROP
+          DROP
         }>
         s2 s4 XCHG
         s1 s3 s0 XCHG3
         pack_state INLINECALLDICT
         c4 POP
       }>
-      s0 s8 XCHG
+      s0 s9 XCHG
       32 LDU
       LDGRAMS
-      23 s() PUSH
+      24 s() PUSH
       s2 PUSH
       GEQ
       IFNOTJMP:<{
         12 BLKDROP
-        s1 s6 XCHG
-        6 BLKDROP
+        s2 s7 XCHG
+        7 BLKDROP
         s2 POP
         s3 POP
         s3 POP
@@ -594,33 +599,33 @@ PROGRAM{
       }>
       s4 s1 PUSH2
       GREATER
-      24 s() PUSH
+      25 s() PUSH
       s6 PUSH
       GEQ
       AND
       IF:<{
-        s10 POP
+        s11 POP
         TRUE
       }>ELSE<{
-        s0 s10 XCHG
+        s0 s11 XCHG
       }>
-      s0 s10 XCHG
+      s0 s11 XCHG
       LDDICT
       DROP
-      22 s() PUSH
+      23 s() PUSH
       OVER
       8 PUSHPOW2
       DICTUGET
       NULLSWAPIFNOT
       NIP
-      s11 PUSH
+      s12 PUSH
       NOT
       SWAP
       AND
       IFJMP:<{
         12 BLKDROP
-        s1 s6 XCHG
-        6 BLKDROP
+        s2 s7 XCHG
+        7 BLKDROP
         s2 POP
         s3 POP
         s3 POP
@@ -632,33 +637,36 @@ PROGRAM{
         64 PUSHINT
         send_message_back CALLDICT
       }>
-      s13 POP
-      18 s() POP
+      s14 POP
       19 s() POP
-      s7 PUSH
+      20 s() POP
+      s8 PUSH
       IF:<{
-        s15 s9 s12 XCPU2
-        19 s() PUSH
-        22 s() PUSH
-        24 s() PUSH
+        s0 16 s() XCHG
+        s10 s13 PUSH2
+        20 s() PUSH
+        23 s() PUSH
+        25 s() PUSH
         ~complete_auction CALLDICT
       }>ELSE<{
-        s0 s15 XCHG
+        s0 16 s() XCHG
       }>
-      s15 PUSH
+      16 s() PUSH
       0 GTINT
-      s8 s(-1) PUXC
+      s9 s(-1) PUXC
       AND
-      s8 PUSH
+      s9 PUSH
       NOT
       OR
       IF:<{
         NEWC
-        s1 s7 XCHG
+        s1 s8 XCHG
         8 STU
-        s1 s5 XCHG
+        s1 s6 XCHG
+        STDICT
+        s1 s4 XCHG
         32 STU
-        s1 s3 XCHG
+        s1 s2 XCHG
         32 STU
         OVER
         STGRAMS
@@ -719,13 +727,13 @@ PROGRAM{
         32 PUSHINT
         DICTUSETB
       }>ELSE<{
-        s11 20 s() XCHG
-        s14 19 s() XCHG
-        s12 18 s() XCHG
-        s13 17 s() XCHG
-        16 s() POP
+        s12 21 s() XCHG
+        s15 20 s() XCHG
+        s13 19 s() XCHG
+        s14 18 s() XCHG
+        17 s() POP
         12 BLKDROP
-        3 BLKDROP
+        4 BLKDROP
       }>
       s3 s4 XCHG
       s1 s3 XCHG
@@ -790,7 +798,9 @@ PROGRAM{
       ~load_common_auction_fields CALLDICT
       3 BLKDROP
       s2 POP
+      s2 POP
       NOW
+      s1 s2 XCHG
       LESS
       38 THROWIFNOT
       0 PUSHINT
@@ -880,11 +890,11 @@ PROGRAM{
         ~load_common_auction_fields CALLDICT
         2DROP
         s3 POP
+        s3 POP
         s3 PUSH
         63 GTINT
         37 THROWIFNOT
         NOW
-        s1 s2 XCHG
         LESS
         38 THROWIFNOT
         s0 s3 XCHG
@@ -921,7 +931,7 @@ PROGRAM{
         c4 POP
         COMMIT
         ACCEPT
-        s4 s1 PUXC
+        s4 s3 PUXC
         GEQ
         s4 s8 PUSH2
         LEQ
@@ -936,11 +946,11 @@ PROGRAM{
           STSLICER
           SWAP
           STGRAMS
-          s0 s2 XCHG
+          s0 s1 s10 XCHG3
           8 PUSHPOW2
           DICTUSETB
         }>ELSE<{
-          s13 s7 s5 XCHG3
+          s5 s7 s13 XCHG3
           5 BLKDROP
         }>
         s8 s0 s3 XC2PU
@@ -1033,8 +1043,8 @@ PROGRAM{
               NULLSWAPIFNOT
               36 THROWIFNOT
               ~load_common_auction_fields CALLDICT
-              s3 s5 XCHG
-              5 BLKDROP
+              s3 s6 XCHG
+              6 BLKDROP
               SWAP
               64 LESSINT
               IF:<{
