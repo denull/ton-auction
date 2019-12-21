@@ -1,8 +1,8 @@
 ;; These are useful methods, however they take precious bytes of storage.
 ;; It's still possible to call them w/o uploading to TON.
 
-tuple auction_tuple(int auction_id, int auction_type, int start_time, int end_time, int bidding_fee, int initial_price, int buyout_price, int minimum_step, int decrypt_time, int fixed_amount)
-  asm(auction_id auction_type start_time end_time bidding_fee initial_price buyout_price minimum_step decrypt_time fixed_amount) "10 TUPLE";
+tuple auction_tuple(int auction_id, int auction_type, int start_time, int end_time, int bidding_fee, int initial_price, int buyout_price, int stock_size, int minimum_step, int decrypt_time, int fixed_amount)
+  asm(auction_id auction_type start_time end_time bidding_fee initial_price buyout_price stock_size minimum_step decrypt_time fixed_amount) "11 TUPLE";
 
 tuple bid_tuple(int bidder_wc, int bidder_addr, int received_amount, int actual_amount)
   asm(bidder_wc bidder_addr received_amount actual_amount) "4 TUPLE";
@@ -44,10 +44,11 @@ _ auctions() method_id {
   do {
     (id, var auction, f) = auctions.udict_get_prev?(32, id);
     if (f) {
-      var (auction_type, comment, start_time, end_time, bidding_fee, initial_price, buyout_price) = (
+      var (auction_type, comment, start_time, end_time, bidding_fee, initial_price, buyout_price, stock_size) = (
         auction~load_uint(8), auction~load_dict(),
         auction~load_uint(32), auction~load_uint(32), 
-        auction~load_grams(), auction~load_grams(), auction~load_grams()
+        auction~load_grams(), auction~load_grams(), auction~load_grams(),
+        auction~load_uint(32)
       );
       var minimum_step = 0;
       var decrypt_time = 0;
@@ -58,7 +59,7 @@ _ auctions() method_id {
         decrypt_time = auction~load_uint(32);
         fixed_amount = auction~load_grams();
       }
-      l = cons(auction_tuple(id, auction_type, start_time, end_time, bidding_fee, initial_price, buyout_price, minimum_step, decrypt_time, fixed_amount), l);
+      l = cons(auction_tuple(id, auction_type, start_time, end_time, bidding_fee, initial_price, buyout_price, stock_size, minimum_step, decrypt_time, fixed_amount), l);
     }
   } until (~ f);
   return l;
@@ -77,10 +78,11 @@ _ bidders(int auction_id) method_id {
   var (auction, auction_found) = auctions.udict_get?(32, auction_id);
   throw_unless(36, auction_found);
 
-  var (auction_type, comment, start_time, end_time, bidding_fee, initial_price, buyout_price) = (
+  var (auction_type, comment, start_time, end_time, bidding_fee, initial_price, buyout_price, stock_size) = (
     auction~load_uint(8), auction~load_dict(),
     auction~load_uint(32), auction~load_uint(32), 
-    auction~load_grams(), auction~load_grams(), auction~load_grams()
+    auction~load_grams(), auction~load_grams(), auction~load_grams(),
+    auction~load_uint(32)
   );
 
   var l = nil;

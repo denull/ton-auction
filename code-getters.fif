@@ -1211,8 +1211,9 @@ PROGRAM{
         LDGRAMS
         LDGRAMS
         LDGRAMS
+        32 LDU
         0 PUSHINT
-        s0 s0 s7 PUSH3
+        s0 s0 s8 PUSH3
         64 LESSINT
         IF:<{
           s2 POP
@@ -1227,7 +1228,8 @@ PROGRAM{
           DROP
           ROT
         }>
-        s9 PUSH
+        s10 PUSH
+        s0 s10 XCHG
         s0 s9 XCHG
         s0 s8 XCHG
         s0 s7 XCHG
@@ -1235,7 +1237,7 @@ PROGRAM{
         s0 s5 XCHG
         s0 s4 XCHG
         s1 s3 s3 XCHG3
-        10 TUPLE
+        11 TUPLE
         s0 s3 XCHG2
         CONS
       }>ELSE<{
@@ -1280,6 +1282,8 @@ PROGRAM{
     LDGRAMS
     NIP
     LDGRAMS
+    NIP
+    32 LDU
     NIP
     PUSHNULL
     s0 s2 XCHG
