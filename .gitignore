@@ -1,2 +1,3 @@
-data
-states
+tests/*.boc
+tests/*.pk
+tests/*.addr
