@@ -2,7 +2,7 @@
 () send_money(int wc, int addr, int amount) impure {
   send_raw_message(begin_cell()
     .store_uint(0xc4, 9)
-    .store_uint(wc, 8)
+    .store_int(wc, 8)
     .store_uint(addr, 256)
     .store_grams(amount)
     .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
@@ -64,7 +64,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
   do {
     (bidder_addr, var bid, var f) = bids.udict_get_next?(256, bidder_addr);
     if (f) {
-      var wc = bid~load_uint(8);
+      var wc = bid~load_int(8);
       var received_amount = bid~load_grams();
       var bid_signature = bid~load_bits(512);
       ifnot (bid.slice_data_empty?()) {
@@ -91,7 +91,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
   do {
     (bidder_addr, var bid, var f) = bids.udict_get_next?(256, bidder_addr);
     if (f) {
-      var wc = bid~load_uint(8);
+      var wc = bid~load_int(8);
       var received_amount = bid~load_grams();
       ifnot (bidder_addr == winner_addr) {
         reserved_balance = reserved_balance - (received_amount - bidding_fee);
@@ -134,7 +134,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
     .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
     .store_uint(0x27fca6b9, 32)   ;; Notification query
     .store_uint(auction_id, 64)
-    .store_uint(winner_wc, 8)     ;; Bidder workchain
+    .store_int(winner_wc, 8)     ;; Bidder workchain
     .store_uint(winner_addr, 256) ;; Bidder addr (can be 0 if there was no bids!)
     .store_grams(winner_bid)      ;; Winning bid amount
     .store_ref( ;; Detailed info about auction (before this bid)
@@ -230,7 +230,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
             .store_uint(stock_size, 32)
             .store_grams(minimum_step)
             .store_grams(msg_value)
-            .store_uint(src_wc, 8)
+            .store_int(src_wc, 8)
             .store_uint(src_addr, 256);
         }
         auctions~udict_set_builder(32, auction_id, auction_builder);
@@ -282,7 +282,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
 
           ;; Store encrypted bid for later
           bids~udict_set_builder(256, src_addr, begin_cell()
-            .store_uint(src_wc, 8)
+            .store_int(src_wc, 8)
             .store_grams(msg_value)
             .store_slice(bid_signature));
 
@@ -338,7 +338,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
       var minimum_step = auction~load_grams();
       winner_bid = auction~load_grams();
       ifnot (winner_bid == 0) {
-        winner_wc = auction~load_uint(8);
+        winner_wc = auction~load_int(8);
         winner_addr = auction~load_uint(256);
         reserved_balance = reserved_balance - (winner_bid - bidding_fee);
       }
@@ -360,7 +360,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
     throw_unless(35, check_signature(slice_hash(in_msg), signature, current_pubkey));
     var bid_body = cs~load_ref().begin_parse();
     var bid_hash = slice_hash(bid_body);
-    var (auction_id, current_wc, current_addr, actual_amount) = (bid_body~load_uint(32), bid_body~load_uint(8), bid_body~load_uint(256), bid_body~load_grams());
+    var (auction_id, current_wc, current_addr, actual_amount) = (bid_body~load_uint(32), bid_body~load_int(8), bid_body~load_uint(256), bid_body~load_grams());
     var (auction, auction_found) = auctions.udict_get?(32, auction_id);
     throw_unless(36, auction_found);
 
@@ -375,7 +375,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
     var (bid, bid_found) = bids.udict_get?(256, current_addr);
     throw_unless(40, bid_found);
 
-    var wc = bid~load_uint(8);
+    var wc = bid~load_int(8);
     throw_unless(41, wc == current_wc);
     var received_amount = bid~load_grams();
     var bid_signature = bid~load_bits(512);
@@ -387,7 +387,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
 
     if ((actual_amount >= initial_price) & (actual_amount <= received_amount)) {
       bids~udict_set_builder(256, current_addr, begin_cell()
-        .store_uint(wc, 8)
+        .store_int(wc, 8)
         .store_grams(received_amount)
         .store_slice(bid_signature)
         .store_grams(actual_amount));
@@ -412,7 +412,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
       ;; Withdraw money (just like from a regular wallet)
       cs~touch();
       while (~ cs.slice_empty?()) {
-        var (wc, addr, amount) = (cs~load_uint(8), cs~load_uint(256), cs~load_grams());
+        var (wc, addr, amount) = (cs~load_int(8), cs~load_uint(256), cs~load_grams());
         transfer_balance += amount;
         throw_if(43, reserved_balance >= total_balance - transfer_balance);
         send_money(wc, addr, amount);
@@ -445,7 +445,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
         do {
           (bidder_addr, var bid, var f) = bids.udict_get_next?(256, bidder_addr);
           if (f) {
-            var wc = bid~load_uint(8);
+            var wc = bid~load_int(8);
             var received_amount = bid~load_grams();
             reserved_balance = reserved_balance - (received_amount - bidding_fee);
             send_money(wc, bidder_addr, received_amount - bidding_fee);

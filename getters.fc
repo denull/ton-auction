@@ -91,7 +91,7 @@ _ bidders(int auction_id) method_id {
     var received_amount = auction~load_grams();
     if (received_amount != 0) {
       var bidder_addr_slice = auction~load_bits(256 + 8);
-      var (bidder_wc, bidder_addr) = (bidder_addr_slice~load_uint(8), bidder_addr_slice~load_uint(256));
+      var (bidder_wc, bidder_addr) = (bidder_addr_slice~load_int(8), bidder_addr_slice~load_uint(256));
       l = cons(bid_tuple(bidder_wc, bidder_addr, received_amount, received_amount), l);
     }
     return l;
@@ -104,7 +104,7 @@ _ bidders(int auction_id) method_id {
       (bidder_addr, var bid, var f) = bids.udict_get_prev?(256, bidder_addr);
       if (f) {
         var (bidder_wc, received_amount) = (
-          bid~load_uint(8),
+          bid~load_int(8),
           bid~load_grams()
         );
         var actual_amount = 0;

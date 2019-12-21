@@ -17,7 +17,7 @@ PROGRAM{
     NEWC
     9 STU
     s1 s5 XCHG
-    8 STU
+    8 STI
     s1 s3 XCHG
     256 STU
     SWAP
@@ -111,7 +111,7 @@ PROGRAM{
       DUP
       IF:<{
         s0 s2 XCHG
-        8 LDU
+        8 LDI
         LDGRAMS
         9 PUSHPOW2
         LDSLICEX
@@ -180,7 +180,7 @@ PROGRAM{
       DUP
       IF:<{
         s0 s2 XCHG
-        8 LDU
+        8 LDI
         LDGRAMS
         s3 s8 PUSH2
         EQUAL
@@ -288,7 +288,7 @@ PROGRAM{
     s1 s5 XCHG
     64 STU
     s1 s2 XCHG
-    8 STU
+    8 STI
     256 STU
     s0 s3 XCHG2
     STGRAMS
@@ -553,7 +553,7 @@ PROGRAM{
             s0 s9 XCHG2
             STGRAMS
             s1 s5 XCHG
-            8 STU
+            8 STI
             s1 s6 XCHG
             256 STU
             4 3 REVERSE
@@ -704,7 +704,7 @@ PROGRAM{
           DROP
           NEWC
           s1 s12 XCHG
-          8 STU
+          8 STI
           s0 s14 XCHG2
           STGRAMS
           s0 s10 XCHG2
@@ -821,7 +821,7 @@ PROGRAM{
           s3 POP
           s3 POP
           SWAP
-          8 LDU
+          8 LDI
           256 LDU
           DROP
           s3 s2 PUXC
@@ -878,7 +878,7 @@ PROGRAM{
         HASHSU
         SWAP
         32 LDU
-        8 LDU
+        8 LDI
         256 LDU
         LDGRAMS
         DROP
@@ -912,7 +912,7 @@ PROGRAM{
         DICTUGET
         NULLSWAPIFNOT
         40 THROWIFNOT
-        8 LDU
+        8 LDI
         s1 s8 PUXC
         EQUAL
         41 THROWIFNOT
@@ -939,7 +939,7 @@ PROGRAM{
         IF:<{
           NEWC
           s1 s6 XCHG
-          8 STU
+          8 STI
           s0 s7 XCHG2
           STGRAMS
           s0 s12 XCHG2
@@ -994,7 +994,7 @@ PROGRAM{
             SEMPTY
             NOT
           }>DO<{
-            8 LDU
+            8 LDI
             256 LDU
             LDGRAMS
             s4 s1 XCPU
@@ -1084,7 +1084,7 @@ PROGRAM{
                   DUP
                   IF:<{
                     s0 s2 XCHG
-                    8 LDU
+                    8 LDI
                     LDGRAMS
                     DROP
                     s0 s5 PUSH2
