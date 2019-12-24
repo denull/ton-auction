@@ -117,8 +117,9 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
     winner_bid = second_bid;
   }
 
+  reserved_balance = reserved_balance - (winner_sent - bidding_fee);
+
   if (winner_sent > winner_bid) {
-    reserved_balance = reserved_balance - (winner_sent - winner_bid);
     send_money(winner_wc, winner_addr, winner_sent - winner_bid);
   }
 
