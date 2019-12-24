@@ -949,11 +949,13 @@ PROGRAM{
         LDGRAMS
         9 PUSHPOW2
         LDSLICEX
-        DROP
-        s10 s0 s0 XC2PU
-        s0 17 s() XCHG
+        s11 s11 s(-1) XCPUXC
+        s0 18 s() XCHG
         CHKSIGNU
         42 THROWIFNOT
+        s0 s15 XCHG
+        SDEMPTY
+        53 THROWIFNOT
         s10 s13 s11 PUSH3
         s12 s15 PUSH2
         pack_state INLINECALLDICT
@@ -962,27 +964,28 @@ PROGRAM{
         ACCEPT
         s4 s3 PUXC
         GEQ
-        s4 s8 PUSH2
+        s4 s14 PUSH2
         LEQ
         AND
         IF:<{
           NEWC
           s1 s6 XCHG
           8 STI
-          s0 s7 XCHG2
+          s0 s13 XCHG2
           STGRAMS
-          s0 s12 XCHG2
+          s0 s6 XCHG2
           STSLICER
           SWAP
           STGRAMS
-          s0 s1 s10 XCHG3
+          s0 s1 s4 XCHG3
           8 PUSHPOW2
           DICTUSETB
         }>ELSE<{
-          s5 s7 s13 XCHG3
+          s5 s13 s7 XCHG3
           5 BLKDROP
         }>
-        s8 s0 s3 XC2PU
+        s8 s8 s0 XCHG3
+        s3 PUSH
         FALSE
         check_blind_bids CALLDICT
         DROP

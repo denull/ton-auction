@@ -397,7 +397,8 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
     throw_unless(41, wc == current_wc);
     var received_amount = bid~load_grams();
     var bid_signature = bid~load_bits(512);
-    throw_unless(42, check_signature(bid_hash, bid_signature, current_pubkey));
+    throw_unless(42, check_signature(bid_hash, bid_signature, current_pubkey)); ;; => previously stored signature is invalid
+    throw_unless(53, bid.slice_data_empty?()); ;; => bid is already decrypted
 
     set_data(pack_state(stored_seqno, owner_pubkey, notification_addr, reserved_balance, auctions));
     commit();
