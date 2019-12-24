@@ -126,6 +126,20 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
   return (winner_wc, winner_addr, winner_bid, all_decrypted, reserved_balance);
 }
 
+(int) return_blind_bids(bids, reserved_balance, bidding_fee) {
+  var bidder_addr = -1;
+  do {
+    (bidder_addr, var bid, var f) = bids.udict_get_next?(256, bidder_addr);
+    if (f) {
+      var wc = bid~load_int(8);
+      var received_amount = bid~load_grams();
+      reserved_balance = reserved_balance - (received_amount - bidding_fee);
+      send_money(wc, bidder_addr, received_amount - bidding_fee);
+    }
+  } until (~ f);
+  return reserved_balance;
+}
+
 (cell, ()) ~complete_auction(cell auctions, int auction_id, slice notification_addr, int winner_wc, int winner_addr, int winner_bid) impure {
   var (auction, auction_found) = auctions~udict_delete_get?(32, auction_id);
   send_raw_message(begin_cell()
@@ -256,6 +270,9 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
       }
 
       if (is_won) {
+        ;; Return all previous bids
+        reserved_balance = return_blind_bids(bids, reserved_balance, bidding_fee);
+
         ;; Remove auction from state, send notification
         auctions~complete_auction(auction_id, notification_addr, src_wc, src_addr, msg_value);
       }
@@ -441,17 +458,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
           send_money(auction~load_uint(8), auction~load_uint(256), current_price - bidding_fee);
         }
       } else {
-        var bids = auction~load_dict();
-        var bidder_addr = -1;
-        do {
-          (bidder_addr, var bid, var f) = bids.udict_get_next?(256, bidder_addr);
-          if (f) {
-            var wc = bid~load_int(8);
-            var received_amount = bid~load_grams();
-            reserved_balance = reserved_balance - (received_amount - bidding_fee);
-            send_money(wc, bidder_addr, received_amount - bidding_fee);
-          }
-        } until (~ f);
+        reserved_balance = return_blind_bids(auction~load_dict(), reserved_balance, bidding_fee);
       }
       auctions~udict_delete_get?(32, auction_id);
     } elseif (op == 4) {

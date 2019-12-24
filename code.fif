@@ -6,6 +6,7 @@ PROGRAM{
   DECLPROC pack_state
   DECLPROC unpack_state
   DECLPROC check_blind_bids
+  DECLPROC return_blind_bids
   DECLPROC ~complete_auction
   DECLPROC recv_internal
   DECLPROC recv_external
@@ -257,6 +258,37 @@ PROGRAM{
       s3 POP
     }>
     s4 s0 s4 XCHG3
+  }>
+  return_blind_bids PROC:<{
+    -1 PUSHINT
+    UNTIL:<{
+      s3 PUSH
+      8 PUSHPOW2
+      DICTUGETNEXT
+      NULLSWAPIFNOT
+      NULLSWAPIFNOT
+      DUP
+      IF:<{
+        s0 s2 XCHG
+        8 LDI
+        LDGRAMS
+        DROP
+        s0 s4 PUSH2
+        SUB
+        s1 s6 XCHG
+        SUB
+        s5 s4 XCPU
+        SUB
+        s2 s(-1) PUXC
+        send_money CALLDICT
+      }>ELSE<{
+        s2 POP
+      }>
+      SWAP
+      NOT
+    }>
+    s2 s3 XCHG
+    3 BLKDROP
   }>
   ~complete_auction PROC:<{
     32 PUSHINT
@@ -638,6 +670,8 @@ PROGRAM{
       20 s() POP
       s8 PUSH
       IF:<{
+        s11 s12 s3 PUXCPU
+        return_blind_bids CALLDICT
         s0 16 s() XCHG
         s10 s13 PUSH2
         20 s() PUSH
@@ -645,9 +679,10 @@ PROGRAM{
         25 s() PUSH
         ~complete_auction CALLDICT
       }>ELSE<{
-        s0 16 s() XCHG
+        s12 16 s() XCHG
+        s0 s12 XCHG
       }>
-      16 s() PUSH
+      s12 PUSH
       0 GTINT
       s9 s(-1) PUXC
       AND
@@ -679,7 +714,7 @@ PROGRAM{
           s10 POP
           s10 POP
           NEWDICT
-          s0 s5 XCHG
+          SWAP
           DEC
           s0 s10 XCHG2
           32 STU
@@ -687,12 +722,12 @@ PROGRAM{
           32 STU
           s0 s4 XCHG2
           STGRAMS
-          s1 s2 XCHG
+          s1 s7 XCHG
           STDICT
         }>ELSE<{
           s15 s(-1) PUXC
           SUB
-          s1 s6 XCHG
+          s1 s10 XCHG
           ADD
           s0 s2 XCHG
           9 PUSHPOW2
@@ -708,7 +743,7 @@ PROGRAM{
           s11 s2 XCHG2
           8 PUSHPOW2
           DICTUSETB
-          s5 s10 XCHG2
+          s0 s10 XCHG
           32 STU
           s1 s7 XCHG
           32 STU
@@ -716,22 +751,20 @@ PROGRAM{
           STGRAMS
           s1 s7 XCHG
           STDICT
-          s3 s6 XCHG
           s1 s3 XCHG
         }>
         s0 s5 s3 XCHG3
         32 PUSHINT
         DICTUSETB
       }>ELSE<{
-        s12 21 s() XCHG
-        s15 20 s() XCHG
+        s15 21 s() XCHG
+        16 s() 20 s() XCHG
         s13 19 s() XCHG
         s14 18 s() XCHG
         17 s() POP
         12 BLKDROP
         4 BLKDROP
       }>
-      s3 s4 XCHG
       s1 s3 XCHG
       pack_state INLINECALLDICT
       c4 POP
@@ -1070,34 +1103,9 @@ PROGRAM{
                 SWAP
                 LDDICT
                 DROP
-                -1 PUSHINT
-                UNTIL:<{
-                  OVER
-                  8 PUSHPOW2
-                  DICTUGETNEXT
-                  NULLSWAPIFNOT
-                  NULLSWAPIFNOT
-                  DUP
-                  IF:<{
-                    s0 s2 XCHG
-                    8 LDI
-                    LDGRAMS
-                    DROP
-                    s0 s5 PUSH2
-                    SUB
-                    s1 s9 XCHG
-                    SUB
-                    s8 s5 XCPU
-                    SUB
-                    s2 s(-1) PUXC
-                    send_money CALLDICT
-                  }>ELSE<{
-                    s2 POP
-                  }>
-                  SWAP
-                  NOT
-                }>
-                3 BLKDROP
+                s0 s4 s4 XCHG3
+                return_blind_bids CALLDICT
+                s0 s2 XCHG
               }>
               s0 s3 XCHG2
               32 PUSHINT
