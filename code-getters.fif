@@ -514,7 +514,7 @@ PROGRAM{
           s1 s12 XCHG
           SUB
           s0 s10 XCHG
-          8 LDU
+          8 LDI
           256 LDU
           DROP
           s0 17 s() XCHG

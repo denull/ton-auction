@@ -215,7 +215,7 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
       ifnot (current_price == 0) {
         ;; Replace current bidder, return him his bid
         reserved_balance = reserved_balance - (current_price - bidding_fee);
-        send_money(auction~load_uint(8), auction~load_uint(256), current_price - bidding_fee);
+        send_money(auction~load_int(8), auction~load_uint(256), current_price - bidding_fee);
       }
 
       if (is_won) {
