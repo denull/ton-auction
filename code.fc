@@ -399,18 +399,17 @@ _ pack_state(int seqno, int owner_pubkey, slice notification_addr, int reserved_
     var bid_signature = bid~load_bits(512);
     throw_unless(42, check_signature(bid_hash, bid_signature, current_pubkey)); ;; => previously stored signature is invalid
     throw_unless(53, bid.slice_data_empty?()); ;; => bid is already decrypted
+    throw_unless(54, (actual_amount >= initial_price) & (actual_amount <= received_amount)); ;; => actual bid is not within correct range
 
     set_data(pack_state(stored_seqno, owner_pubkey, notification_addr, reserved_balance, auctions));
     commit();
     accept_message();
 
-    if ((actual_amount >= initial_price) & (actual_amount <= received_amount)) {
-      bids~udict_set_builder(256, current_addr, begin_cell()
-        .store_int(wc, 8)
-        .store_grams(received_amount)
-        .store_slice(bid_signature)
-        .store_grams(actual_amount));
-    }
+    bids~udict_set_builder(256, current_addr, begin_cell()
+      .store_int(wc, 8)
+      .store_grams(received_amount)
+      .store_slice(bid_signature)
+      .store_grams(actual_amount));
 
     var (winner_wc, winner_addr, winner_bid, all_decrypted, reserved_balance) = check_blind_bids(auction_type, bidding_fee, bids, reserved_balance, false);
 

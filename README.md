@@ -221,6 +221,8 @@ But most importantly, you can run `test-external.fif` or `test-internal.fif` wit
    You can't participate twice in the same blind auction.
 * Error **53**. *Your bid is already decrypted*.
    You've sent the decryption message twice.
+* Error **54**. *The actual bid value is not within the valid range*.
+   The bid should at least equal to *initial-price* and not exceed the received amount.
 
 For internal messages, instead of throwing errors, the error code is returned as a 32-bit number in the body of the response, after 32-bit *op* (=`0xfffffffe`), 64-bit *query_id*, and 32-bit original *op*.
 

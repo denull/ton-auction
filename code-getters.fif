@@ -961,34 +961,30 @@ PROGRAM{
         s0 s15 XCHG
         SDEMPTY
         53 THROWIFNOT
-        s10 s13 s11 PUSH3
-        s12 s15 PUSH2
-        pack_state INLINECALLDICT
-        c4 POP
-        COMMIT
-        ACCEPT
         s4 s3 PUXC
         GEQ
         s4 s14 PUSH2
         LEQ
         AND
-        IF:<{
-          NEWC
-          s1 s6 XCHG
-          8 STI
-          s0 s13 XCHG2
-          STGRAMS
-          s0 s6 XCHG2
-          STSLICER
-          SWAP
-          STGRAMS
-          s0 s1 s4 XCHG3
-          8 PUSHPOW2
-          DICTUSETB
-        }>ELSE<{
-          s5 s13 s7 XCHG3
-          5 BLKDROP
-        }>
+        54 THROWIFNOT
+        s9 s12 s10 PUSH3
+        s11 s14 PUSH2
+        pack_state INLINECALLDICT
+        c4 POP
+        COMMIT
+        ACCEPT
+        NEWC
+        s1 s6 XCHG
+        8 STI
+        s0 s13 XCHG2
+        STGRAMS
+        s0 s6 XCHG2
+        STSLICER
+        SWAP
+        STGRAMS
+        s0 s1 s4 XCHG3
+        8 PUSHPOW2
+        DICTUSETB
         s8 s8 s0 XCHG3
         s3 PUSH
         FALSE
