@@ -1,1 +1,323 @@
-nothing here yet
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ton-auction</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css">
+
+  <!-- PrismJS: Syntax Highlighting ->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.13.0/themes/prism.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.13.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.13.0/plugins/normalize-whitespace/prism-normalize-whitespace.js"></script>
+
+  <!-- Font Awesome ->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.9/css/solid.css">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.9/css/fontawesome.css">
+  -->
+
+  <!-- Mustard UI -->
+  <link rel="stylesheet" href="https://unpkg.com/mustard-ui@latest/dist/css/mustard-ui.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Encode+Sans:400,600|Fira+Mono&display=swap" rel="stylesheet">
+<style>
+body {
+  padding-bottom: 4rem;
+}
+body, p {
+  line-height: 1.7;
+}
+body, h1, h2, h3, h4, h5, h6 {
+  font-family: 'Encode Sans', sans-serif;
+}
+h1, h2 {
+  margin: 40px 0 20px;
+}
+code {
+  font-family: 'Fira Mono', Monaco, 'Courier New', Courier, monospace;
+  white-space: normal;
+}
+pre {
+  overflow: visible;
+  margin: 15px -50px 15px 0px;
+}
+li {
+  margin: 2px 0;
+}
+.container {
+  max-width: 840px;
+  padding: 0 20px; }
+.navbar {
+  display: none; }
+
+/* Larger than tablet */
+@media (min-width: 750px) {
+  /* Navbar */
+  .navbar + .docs-section {
+    border-top-width: 0; }
+  .navbar,
+  .navbar-spacer {
+    display: block;
+    width: 100%;
+    height: 4rem;
+    background: #eee;
+    z-index: 99;
+    position: fixed;
+    top: 0px; }
+  .navbar-spacer {
+    display: none; }
+  .navbar > .container {
+    width: 100%; }
+  .navbar-list {
+    display: flex;
+    list-style: none;
+    margin-bottom: 0; }
+  .navbar-item {
+    position: relative;
+    float: left;
+    margin-bottom: 0; }
+  .navbar-item-fill {
+    flex: 1;
+  }
+  .navbar-link, .navbar-item b {
+    /* text-transform: uppercase; */
+    /* font-size: 15px; */
+    /* font-weight: 600; */
+    letter-spacing: .06rem;
+    margin-right: 35px;
+    text-decoration: none;
+    line-height: 4rem;
+    color: #222;
+   }
+  .navbar-link.active {
+    color: #33C3F0; }
+}
+
+.anchor {
+  position: relative;
+  top: -4rem;
+}
+.presentation {
+  background: #222;
+  position: relative;
+  width: 100%;
+  height: 560px;
+  margin-top: 4rem;
+}
+.presentation .content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 600px;
+  height: 400px;
+  transform: scale(1.4);
+  margin: auto;
+  border: none;
+}
+</style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <ul class="navbar-list">
+        <li class="navbar-item"><b>ton-auction</b></li>
+        <li class="navbar-item-fill"></li>
+        <li class="navbar-item"><a class="navbar-link" href="#description">Getting Started</a></li>
+        <li class="navbar-item"><a class="navbar-link" href="#troubleshooting">Troubleshooting</a></li>
+        <li class="navbar-item"><a class="navbar-link" href="https://github.com/deNULL/ton-auction">Github</a></li>
+      </ul>
+    </div>
+  </nav>
+  <div class="presentation">
+    <iframe src="presentation/index.html" width="600" height="400" class="content"></iframe>
+  </div>
+  <div class="container">
+    <div id="description" class="anchor"></div>
+    <h1>Getting Started</h1>
+    <p><b>ton-auction</b> is a multi-purpose smart-contract for TON blockchain implementing both an auction system and a shop. It was made by Denis Olshin as part of Telegram contest announced on 09/24/2019 (<a href="https://t.me/contest/102">https://t.me/contest/102</a>).</p>
+    <p>Instructions below assume that you are using <a href="https://github.com/ton-blockchain/ton/tree/master/lite-client-docs">TON&#39;s lite-client</a> with FunC and Fift binaries available at PATH, and that you&#39;re familiar with those tools.</p>
+    <p>For basic info about running Fift scripts and uploading messages to TON, please refer to <a href="https://github.com/ton-blockchain/ton/blob/master/doc/LiteClient-HOWTO">https://github.com/ton-blockchain/ton/blob/master/doc/LiteClient-HOWTO</a>.</p>
+    <h1 id="what-s-included">What&#39;s included</h1>
+    <p><a href="https://github.com/deNULL/ton-auction">The Github repository of this project</a> contains following files:</p>
+    <ul>
+    <li><code>common-utils.fif</code>
+    A Fift library with some helper functions, that could be useful for creating any kind of smart contract. You don&#39;t need to run this file.</li>
+    <li><code>auction-utils.fif</code>
+    Similarly to <code>common-utils.fif</code>, this is a library file. However, it contains only functions specific to this particular auction contract implementation. Each other Fift script here includes it. You don&#39;t need to run this file either.</li>
+    <li><code>code.fc</code>
+    Code of this smart contract, written in FunC. Note that it does not include get-methods (except for <code>seqno</code> method).</li>
+    <li><code>getters.fc</code>
+    Get-methods of this smart contract. They are stored separately so you can upload your wallet code without them (it will still be functional, but will take less space).</li>
+    <li><code>code.fif</code>
+    Compiled version of <code>code.fc</code>. Below you&#39;ll find instructions how to recompile it yourself.</li>
+    <li><code>code-getters.fif</code>
+    Compiled version of <code>code.fc</code> + <code>getters.fc</code>.</li>
+    <li><code>init.fif</code>, <code>new-auction.fif</code>, <code>cancel-auction.fif</code>, <code>place-bid.fif</code>, <code>decrypt-bid.fif</code>, <code>ping-auction.fif</code>, <code>withdraw.fif</code>, <code>upgrade-code.fif</code> and <code>show-state.fif</code>
+    Fift scripts for creating new contract, creating new auctions, placing bids and so on. Below you&#39;ll find detailed explanations about all of them.</li>
+    <li><code>test-init.fif</code>
+    Fift script that simulates the initialisation of a contract locally, without actually uploading it to blockchain.</li>
+    <li><code>test-external.fif</code>
+    Fift script that simulates sending an external message to a contract locally. Loads the original contract state and returns the modified one.</li>
+    <li><code>test-internal.fif</code>
+    Fift script that simulates sending an internal message to a contract locally. Loads the original contract state and returns the modified one.</li>
+    <li><code>test-method.fif</code>
+    Fift script that simulates executing a get-method of a smart contract for a given state. It includes <code>code-getters.fif</code>, so it can call get-methods even if the contract was uploaded without them.</li>
+    <li><code>tests</code>
+    Directory containing some shell scripts for testing purposes. Note that you&#39;ll probably need to fix paths in them before using.</li>
+    </ul>
+    <p>If you wish to make modifications to the contract&#39;s code, it&#39;s better to test it using <code>test-...</code> scripts without actually uploading it to the blockchain. The same can be done in case something goes wrong (see &quot;Troubleshooting&quot; section below).</p>
+    <h1 id="-re-building-the-contract-code">(Re)building the contract code</h1>
+    <p>As was mentioned above, the smart contract code is located in <code>code.fc</code> and its getters are in <code>getters.fc</code>. These files are written in FunC language, so after you make any changes to them, you need to run FunC transpiler before you can upload the updated code.</p>
+    <p>Run these commands (<code>&lt;path-to-source&gt;</code> here is the root directory with the TON source code):</p>
+    <pre><code>func -o<span class="hljs-string">"code-getters.fif"</span> -P &lt;path-to-source&gt;/crypto/smartcont/stdlib<span class="hljs-selector-class">.fc</span> <span class="hljs-selector-tag">code</span><span class="hljs-selector-class">.fc</span> getters<span class="hljs-selector-class">.fc</span>
+func -o<span class="hljs-string">"code.fif"</span> -P &lt;path-to-source&gt;/crypto/smartcont/stdlib<span class="hljs-selector-class">.fc</span> <span class="hljs-selector-tag">code</span>.fc</code></pre><p>This should rebuild files <code>code-getters.fif</code> (full version of the contract) and <code>code.fif</code> (stripped-down version, without getters).</p>
+    <h1 id="how-to-use">How to use</h1>
+    <p>This contract allows you to conduct any number of simultaneous <strong>auctions</strong>. Each auction is defined by the initial price, (optionally) the buyout price, bidding fee, start and end time, and other configuration params. By setting the initial price equal to the buyout price, this can be turned into a <strong>trading process</strong>. In this case it&#39;s also very useful to set the stock size option.</p>
+    <p>While an auction is active, anyone can place a bid by sending an internal message to this contract. If the attached amount of grams is above the current price, it&#39;s accepted, and the previous top bid is cancelled (its amount, minus the bidding fee, is returned to the bidder).</p>
+    <p>Auction ends at the specified end time, or if the current price reaches the buyout price. At that moment a special internal message to a predefined &quot;<em>notification address</em>&quot; is generated (to notify some other contract about the completion). Note that the actual transfer of goods to the winner is the responsibility of that contract (or some off-chain script monitoring the blockchain state).</p>
+    <p>Special case: blind auctions. In this case every participant submits an internal message with a fixed amount of grams, and attaches to a signature of his actual bid. For some predefined time after the auction end, participants provide their bids (and their public keys, so the original signatures can be validated), so the winner can be determined. All non-winning bids are fully returned (minus bidding fees), and winner receives only the difference between the amount he sent and his actual bid.</p>
+    <p>Owner of the auction contract can withdraw funds at any time on condition that the remaining balance is at least equal to the sum of all currently active top bids (so they can be always returned).</p>
+    <h2 id="initialising-a-new-contract">Initialising a new contract</h2>
+    <p><code>./init.fif &lt;workchain-id&gt; &lt;notification-addr&gt; [&lt;filename-base&gt;] [-C &lt;code-fif&gt;]</code></p>
+    <p>This script is used to generate an initialisation message for your contract. It will provide you with a non-bounceable address to send some initial funds to, and after that you can upload to contract&#39;s code (using <code>sendfile</code> in your TON client).</p>
+    <p>Note that you&#39;re required to specify a &quot;<em>notification address</em>&quot; here. After completion of each auction, an internal message with an op = <code>0x27fca6b9</code> is generated, containing the following body:</p>
+    <ul>
+    <li><em>op</em> (32 bits) = <code>0x27fca6b9</code>.</li>
+    <li><em>auction_id</em> (32 bits) The identifier of the auction.</li>
+    <li><em>winner_addr</em> (264 bits) The address of the winner (8-bit workchain and a 256-bit address). If this address is equal to 0, there&#39;s no winner (no bids were placed before auction ended).</li>
+    <li><em>winner_bid</em> (4-135 bits) The size of the winning bid in nanograms (serialized as usual, 4-bit length + 8*l bits number).</li>
+    <li><em>auction</em> (ref to a child cell) The descriptor of the auction right before the completion.</li>
+    </ul>
+    <p>This message does not require any response (so it does not contain a <em>query_id</em> field), and can be even bounced back (bounced message will be silently ignored). The only purpose of it is to notify other contract (or outside world) of the auction&#39;s completion.</p>
+    <p>Notification message is not sent when the auction is cancelled.</p>
+    <h2 id="starting-a-new-auction">Starting a new auction</h2>
+    <p><code>./new-auction.fif &lt;contract&gt; &lt;seqno&gt; &lt;auction-id&gt; &lt;auction-type&gt; &lt;end-time&gt; [&lt;decrypt-time&gt; &lt;fixed-amount&gt;] [-c &lt;comment&gt;] [-s &lt;minimum-step&gt;] [-t &lt;start-time&gt;] [-f &lt;bidding-fee&gt;] [-i &lt;initial-price&gt;] [-b &lt;buyout-price&gt;] [-n &lt;stock-size&gt;] [-O &lt;output-boc&gt;]</code></p>
+    <p>As this contract allows multiple concurrent auctions (or trades), the owner of it needs to create them first with this script.</p>
+    <p>It has many options, and almost all of them can be sensibly combined with each other. It gives lots of flexibility and covers many different use cases.</p>
+    <p>List of options:</p>
+    <ul>
+    <li><em>contract</em> Basename of the contract (path to file containing its private key, without an extension).</li>
+    <li><em>seqno</em> Current <em>seqno</em> of the contract (can be retrieved using the <em>seqno</em> get-method).</li>
+    <li><em>auction-id</em> 32-bit identifier of the future auction (any unique number).</li>
+    <li><em>auction-type</em> Currently 3 types of auctions are supported:<br/>
+      <div style="margin-left: 40px"><code>0</code>, English (open) auction;<br/>
+      <code>64</code>, Blind (sealed-bid first-price) auction;<br/>
+      <code>65</code>, Vickrey (sealed-bid second-price) auction.</div>
+    </li>
+    <li><em>comment</em> Arbitrary text describing what exactly is being sold here.</li>
+    <li><em>start-time</em> Unixtime, the time when this auction starts.</li>
+    <li><em>end-time</em> Unixtime, the time when this auction ends.</li>
+    <li><em>decrypt-time</em> Unixtime, the time before which all bidders in a sealed-bid auction must present their actual bids.</li>
+    <li><em>fixed-amount</em> For sealed-bid auctions: the minimum amount in Grams to be sent with each (encrypted) bid.</li>
+    <li><em>minimum-step</em> For open auctions: the minimum difference between bids required to out-bid previous top bidder.</li>
+    <li><em>bidding-fee</em> The amount in Grams that won&#39;t be returned to losing bidders.</li>
+    <li><em>initial-price</em> The minimum amount in Grams, that the first bid in an open auction should be equal to.</li>
+    <li><em>buyout-price</em> The amount in Grams which instantly triggers the auction completion.</li>
+    <li><em>stock-size</em> The number of times this auction should be repeated automatically.</li>
+    </ul>
+    <p>Some notes about <em>stock-size</em>. When the auction with a non-zero stock size completes, it automatically re-created again, but with stock size decreased by 1. So the first internal message to notification address will contain the original value of <em>stock-size</em>, the second — <em>stock-size</em> - 1, and so on. The actual number of times the auction will be conducted will be equal to <em>stock-size</em> + 1. The <em>start-time</em> and <em>end-time</em> are not updated, those options define the whole time range for all runs of the auction.</p>
+    <p>When a bid is returned (because someone placed a larger bid), by default no fees are deducted. To prevent draining funds on forwarding fees, it&#39;s recommended to always set <em>bidding-fee</em> to some small value.</p>
+    <h2 id="cancelling-an-auction">Cancelling an auction</h2>
+    <p><code>./cancel-auction.fif &lt;contract&gt; &lt;seqno&gt; &lt;auction-id&gt; [-O &lt;output-boc&gt;]</code></p>
+    <p>The owner can cancel an auction at any moment. All current bids will be returned to their bidders.</p>
+    <h2 id="placing-a-bid">Placing a bid</h2>
+    <p><code>./place-bid.fif &lt;auction-id&gt; [&lt;wallet-addr&gt; &lt;bid-amount&gt; [-B &lt;bid-filename&gt;]] [-O &lt;output-boc&gt;]</code></p>
+    <p>To place a bid in an auction, you need to send <strong>an internal</strong> message to this contract (from your wallet, for example). Such message should contain body with an <em>op</em> = 0x64, some arbitrary <em>query_id</em> and some other details. This script helps to create it.</p>
+    <p>For an open auction, the process is simple: only the <em>auction-id</em> is required here. After running <code>place-bid.fif</code>, you take the generated boc-file, and pass it to your wallet&#39;s order creation script as a body.</p>
+    <p>For blind auctions (first-price or second-price), it&#39;s a bit trickier. Your bid should remain secret until the second stage of the auction (<em>decryption phase</em>). You provide <em>auction-id</em>, your wallet&#39;s address (the internal message sender), and the intended bid amount. This script will store this data to a file named <code>&lt;bid-filename&gt;.boc</code>, generate a signature for it, and put it to <code>&lt;output-boc&gt;.boc</code> (which, again, should be passed to your wallet&#39;s order creation script). Keep the file <code>&lt;bid-filename&gt;.boc</code> until the auction ends, and after that use <code>decrypt-bid.fif</code> script to send a decryption message.</p>
+    <p>Remember that in a blind auction you specify <strong>the actual bid</strong> here, but attach (a larger) <em>fixed-amount</em>, which is specified in an auction descriptor. This allows you to hide the sum you bid (the difference will be returned to you after the auction&#39;s completion).</p>
+    <h2 id="decrypt-a-bid">Decrypt a bid</h2>
+    <p><code>./decrypt-bid.fif &lt;contract-addr&gt; &lt;seqno&gt; [-B &lt;bid-filename&gt;] [-O &lt;output-boc&gt;]</code></p>
+    <p>If you participated in a blind auction, you&#39;re expected to present your bid after the <em>end-time</em>, but before the <em>decrypt-time</em> of the auction. You do that by using this script (and passing to it a <code>&lt;bid-filename&gt;.boc</code>, created by <code>place-bid.fif</code> script).</p>
+    <h2 id="pinging-an-auction">Pinging an auction</h2>
+    <p><code>./ping-auction.fif &lt;contract-addr&gt; &lt;seqno&gt; &lt;auction-id&gt; [-O &lt;output-boc&gt;]</code></p>
+    <p>After the auction&#39;s deadline (defined by <em>end-time</em>), anyone can trigger the actual completion event by pinging the contract.</p>
+    <h2 id="withdrawing-funds-from-the-contract">Withdrawing funds from the contract</h2>
+    <p><code>./withdraw.fif &lt;contract&gt; &lt;dest-addr&gt; &lt;seqno&gt; &lt;amount&gt; [-O &lt;output-boc&gt;]</code></p>
+    <p>At any moment, the owner of the contract can withdraw any amount of Grams stored in it, if the remaining balance of enough to pay back all current bids.</p>
+    <h2 id="upgrading-contract-s-code">Upgrading contract&#39;s code</h2>
+    <p><code>./upgrade-code.fif &lt;contract&gt; &lt;seqno&gt; [-C &lt;code-fif&gt;] [-O &lt;output-boc&gt;]</code></p>
+    <p>Use this request to update your contract&#39;s code. By default it uses code from <code>code-getters.fif</code>, but you can pass any file via <code>-C</code> option.</p>
+    <h2 id="inspecting-contract-s-state">Inspecting contract&#39;s state</h2>
+    <p><code>./show-state.fif &lt;data-boc&gt;</code></p>
+    <p>This script will help to examine the current state of the contract. First, you need to download its state using the <code>saveaccountdata &lt;filename&gt; &lt;addr&gt;</code> command in the shell of your client. After that you can pass the generated boc-file to this script.</p>
+    <p>It should output detailed info about cotract&#39;s params, list of active auctions and bids. Alternatively, you can use get-methods to inspect those values (see the next section).</p>
+    <h1 id="get-methods">Get methods</h1>
+    <p>In case you&#39;ve used the default (non-stripped down) version of the contract, it will include some get-methods. You can run them in the TON client using the <code>runmethod</code> command. Note that they return raw data, so you may prefer using <code>show-state.fif</code> instead (see &quot;Inspecting contract&#39;s state&quot; section). </p>
+    <p>List of available methods:</p>
+    <ul>
+    <li><code>seqno</code>
+    Returns the current stored value of seqno for this wallet. This method is available in the stripped-down version too.</li>
+    <li><code>owner_pubkey</code>
+    Returns the public key of this contract&#39;s owner.</li>
+    <li><code>notification_addr</code>
+    Returns the notification address of this contract.</li>
+    <li><code>reserved_amount</code>
+    Returns the amount of nanograms that are currently reserved (i.e. cannot be withdrawn).</li>
+    <li><code>auctions</code>
+    Returns the list of currently active auctions.</li>
+    <li><code>bidders(auction_id)</code>
+    Returns the list of bids in an auction (for an open auction, there&#39;s maximum 1 bid at any given time).</li>
+    </ul>
+    <div id="troubleshooting" class="anchor"></div>
+    <h1>Troubleshooting</h1>
+    <p>After the request is uploaded to TON, there&#39;s no practical way to check what&#39;s happening with it (until it will be accepted). So if something goes wrong and your message is not accepted by the contract, you can only guess why.</p>
+    <p>Fortunately, there&#39;s couple of scripts that will help in this situation. First, you need to perform <code>saveaccountdata &lt;filename&gt; &lt;addr&gt;</code> command in the TON client shell. This will produce a boc-file containing current state of your contract.</p>
+    <p>Now you can inspect it using <code>show-state.fif</code>. Alternatively, you can manually call get-methods of the contract using <code>test-method.fif</code> (it should produce the same info, but in raw format).</p>
+    <p>But most importantly, you can run <code>test-external.fif</code> or <code>test-internal.fif</code> with a message file (that you were trying to upload) to simulate the execution of the smart contract, and check the TVM output. In addition to builtin errors, there are some error codes that could be thrown:</p>
+    <ul>
+    <li>Error <strong>33</strong>. <em>Invalid outer seqno</em>.
+    The current stored seqno is different from the one in the incoming message.</li>
+    <li>Error <strong>34</strong>. <em>Invalid signature</em>.
+    The signature of this message is invalid.</li>
+    <li>Error <strong>35</strong>. <em>Message is expired</em>.
+    The message has a valid_until field set and it&#39;s in the past. Note that the provided Fift scripts do not set this field (you can set the expiration time for an order, but not for a message containing it).</li>
+    <li>Error <strong>36</strong>. <em>Auction not found</em>.
+    The auction with that identifier is not found (cancelled, completed, or never existed).</li>
+    <li>Error <strong>37</strong>. <em>Invalid auction type</em>.
+    Decrypting bids is possible only for blind auctions (with <em>auction-type</em> &gt;= 64).</li>
+    <li>Error <strong>38</strong>. <em>Auction is not yet ended</em>.
+    It&#39;s impossible to decrypt a bid before the auction ends.</li>
+    <li>Error <strong>39</strong>. <em>Decryption timeout</em>.
+    It&#39;s too late to decrypt a bid, because <em>decrypt-time</em> is in the past.</li>
+    <li>Error <strong>40</strong>. <em>Bid not found</em>.
+    You&#39;re trying to decrypt a non-existent bid.</li>
+    <li>Error <strong>41</strong>. <em>Wrong workchain id</em>.
+    The workchain does not match.</li>
+    <li>Error <strong>42</strong>. <em>Invalid bid signature</em>.
+    The provided bid body&#39;s signature is not equal to a stored one.</li>
+    <li>Error <strong>43</strong>. <em>This amount is too large to withdraw</em>.
+    By withdrawing the provided amount of Grams, the remaining balance will be less than the currently reserved amount.</li>
+    <li>Error <strong>44</strong>. <em>Duplicate auction id</em>.
+    Auction with this id already exists.</li>
+    <li>Error <strong>45</strong>. <em>Auction&#39;s decryption phase is not yet over</em>.
+    You can&#39;t ping a blind auction before its decryption phase is over.</li>
+    <li>Error <strong>46</strong>. <em>Auction is not yet started</em>.
+    You can&#39;t participate before the auction is started.</li>
+    <li>Error <strong>47</strong>. <em>Auction is already ended</em>.
+    You can&#39;t participate after the auction end.</li>
+    <li>Error <strong>48</strong>. <em>Bid is less than bidding fee</em>.
+    Your bid should be at least equal to the bidding fee.</li>
+    <li>Error <strong>49</strong>. <em>Bid is less than initial price</em>.
+    Your bid should be at least equal to the initial price.</li>
+    <li>Error <strong>50</strong>. <em>Difference is less than minimum step</em>.
+    Difference between your bid and current top bid should be at least equal to the minimum step.</li>
+    <li>Error <strong>51</strong>. <em>Bid is less than fixed amount</em>.
+    In a blind auction, your bid should be at least equal to the fixed amount.</li>
+    <li>Error <strong>52</strong>. <em>You already participated in this auction</em>.
+    You can&#39;t participate twice in the same blind auction.</li>
+    <li>Error <strong>53</strong>. <em>Your bid is already decrypted</em>.
+    You&#39;ve sent the decryption message twice.</li>
+    <li>Error <strong>54</strong>. <em>The actual bid value is not within the valid range</em>.
+    The bid should at least equal to <em>initial-price</em> and not exceed the received amount.</li>
+    </ul>
+    <p>For internal messages, instead of throwing errors, the error code is returned as a 32-bit number in the body of the response, after 32-bit <em>op</em> (=<code>0xfffffffe</code>), 64-bit <em>query_id</em>, and 32-bit original <em>op</em>.</p>
+    <h1 id="fift-words-conventions">Fift words conventions</h1>
+    <p>Fift language is quite flexible, but it can be difficult to read. There&#39;s two main reasons for that: stack juggling and no strict conventions for word names. To make the code more readable, some custom conventions were introduced within this repository:</p>
+    <p><code>kebab-case-words()</code> are helper functions (defined in <code>common-utils.fif</code> and <code>auction-utils.fif</code>). Note that the name includes the parentheses at the end. (The only exceptions are <code>maybe,</code> and <code>maybe@+</code>)</p>
+    <p><code>CamelCaseWords</code> are constants, defined using a <code>=:</code> word.</p>
+    <p>Those styles are chosen to stand out from the builtin words and from each other as much as possible.</p>
+  </div>
+</body>
+</html>
