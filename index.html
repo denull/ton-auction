@@ -34,23 +34,23 @@ h1, h2 {
 }
 code {
   font-family: 'Fira Mono', Monaco, 'Courier New', Courier, monospace;
-  white-space: normal;
+  white-space: inherit;
 }
 pre {
-  overflow: visible;
-  margin: 15px -50px 15px 0px;
+  overflow: scroll;
+  white-space: pre;
 }
 li {
   margin: 2px 0;
 }
 .container {
+  width: 100%;
+  overflow: hidden;
   max-width: 840px;
   padding: 0 20px; }
 .navbar {
   display: none; }
 
-/* Larger than tablet */
-@media (min-width: 750px) {
   /* Navbar */
   .navbar + .docs-section {
     border-top-width: 0; }
@@ -61,7 +61,6 @@ li {
     height: 4rem;
     background: #eee;
     z-index: 99;
-    position: fixed;
     top: 0px; }
   .navbar-spacer {
     display: none; }
@@ -90,7 +89,6 @@ li {
    }
   .navbar-link.active {
     color: #33C3F0; }
-}
 
 .anchor {
   position: relative;
@@ -101,19 +99,33 @@ li {
   position: relative;
   width: 100%;
   height: 560px;
-  margin-top: 4rem;
+  overflow: hidden;
 }
 .presentation .content {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  top: 50%;
+  left: 50%;
   width: 600px;
   height: 400px;
-  transform: scale(1.4);
-  margin: auto;
+  transform: scale(1.4); 
+  margin: -200px 0 0 -300px;
   border: none;
+}
+
+.nav-optional {
+  display: none;
+}
+/* Larger than tablet */
+@media (min-width: 750px) {
+  .nav-optional {
+    display: block;
+  }
+  .presentation {
+    margin-top: 4rem;
+  }
+  .navbar {
+    position: fixed;
+  }
 }
 </style>
 </head>
@@ -123,14 +135,14 @@ li {
       <ul class="navbar-list">
         <li class="navbar-item"><b>ton-auction</b></li>
         <li class="navbar-item-fill"></li>
-        <li class="navbar-item"><a class="navbar-link" href="#description">Getting Started</a></li>
-        <li class="navbar-item"><a class="navbar-link" href="#troubleshooting">Troubleshooting</a></li>
+        <li class="navbar-item"><a class="navbar-link nav-optional" href="#description">Getting Started</a></li>
+        <li class="navbar-item"><a class="navbar-link nav-optional" href="#troubleshooting">Troubleshooting</a></li>
         <li class="navbar-item"><a class="navbar-link" href="https://github.com/deNULL/ton-auction">Github</a></li>
       </ul>
     </div>
   </nav>
-  <div class="presentation">
-    <iframe src="presentation/index.html" width="600" height="400" class="content"></iframe>
+  <div class="presentation" id="presentationContainer">
+    <iframe src="presentation/index.html" width="600" height="400" class="content" id="presentation"></iframe>
   </div>
   <div class="container">
     <div id="description" class="anchor"></div>
@@ -319,5 +331,21 @@ func -o<span class="hljs-string">"code.fif"</span> -P &lt;path-to-source&gt;/cry
     <p><code>CamelCaseWords</code> are constants, defined using a <code>=:</code> word.</p>
     <p>Those styles are chosen to stand out from the builtin words and from each other as much as possible.</p>
   </div>
+
+<script>
+  function updateSize() {
+    var pr = document.getElementById('presentation');
+    var container = document.getElementById('presentationContainer');
+    var width = window.innerWidth
+      || document.documentElement.clientWidth
+      || document.body.clientWidth;
+    var scale = Math.min(width / 620, 1.4);
+
+    pr.style.transform = 'scale(' + scale + ')';
+    container.style.height = 400 * scale + 'px';
+  }
+  updateSize();
+  window.onresize = updateSize;
+</script>
 </body>
 </html>
